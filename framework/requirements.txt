@@ -1,0 +1,8 @@
+duckdb>=0.9.0
+openai
+pandas
+pyyaml
+tqdm
+sqlparse
+httpx
+pydantic

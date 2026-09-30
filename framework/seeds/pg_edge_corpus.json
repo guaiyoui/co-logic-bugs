@@ -1,0 +1,3169 @@
+[
+ {
+  "setup_sqls": [],
+  "query": "SELECT xpath('//a[', '<a><b>1</b></a>')",
+  "source": "pg_edge:xml#0",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "xml",
+   "malformed xpath expr"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT * FROM XMLTABLE('/a/b' PASSING '<a><b>1</b></a>' COLUMNS v text PATH '.')",
+  "source": "pg_edge:xml#1",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "xml",
+   "XMLTABLE basic"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT xmlelement(name a, xmlattributes(1 AS x), xmlelement(name b, 'y'))",
+  "source": "pg_edge:xml#2",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "xml",
+   "nested xmlelement"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT xmlparse(document '<a>')",
+  "source": "pg_edge:xml#3",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "xml",
+   "malformed doc parse"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT * FROM XMLTABLE('*' PASSING '<a/>' COLUMNS id FOR ORDINALITY, v text NOT NULL PATH '@v')",
+  "source": "pg_edge:xml#4",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "xml",
+   "XMLTABLE ordinality + NOT NULL col"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT xmlforest(NULL::int, 'x', NULL::text)",
+  "source": "pg_edge:xml#5",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "xml",
+   "xmlforest nulls"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT jsonb_path_query('{\"a\":1}', 'strict $.a')",
+  "source": "pg_edge:jsonb_path#6",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_path",
+   "strict mode member"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT jsonb_path_query('{\"a\":1}', '$.a[')",
+  "source": "pg_edge:jsonb_path#7",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_path",
+   "malformed jsonpath"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT jsonb_path_query('{\"d\":\"2024-13-45\"}', '$.d.datetime()')",
+  "source": "pg_edge:jsonb_path#8",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_path",
+   "datetime() on invalid date"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT jsonb_path_query('{\"d\":\"10:20:30\"}', '$.d.datetime(\"HH24:MI:SS\")')",
+  "source": "pg_edge:jsonb_path#9",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_path",
+   "datetime() with template"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT jsonb_path_query('[\"abc\"]', 'lax $[*] ? (@ like_regex \"^[a\")')",
+  "source": "pg_edge:jsonb_path#10",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_path",
+   "malformed regex in like_regex"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT jsonb_path_query('\"9999999999999999999999\"', '$.bigint()')",
+  "source": "pg_edge:jsonb_path#11",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_path",
+   "bigint() overflow"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT jsonb_path_query('[0.1, 0.2]', 'lax $[*].double()')",
+  "source": "pg_edge:jsonb_path#12",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_path",
+   "double() over array"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT jsonb_path_query('{\"a\":1}', '$.keyvalue()')",
+  "source": "pg_edge:jsonb_path#13",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_path",
+   "keyvalue() on object"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT jsonb_path_query('42', '$.string()')",
+  "source": "pg_edge:jsonb_path#14",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_path",
+   "string() on number"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT jsonb_path_query_tz('{\"d\":\"2024-01-01 10:00:00+05\"}', '$.d.datetime()')",
+  "source": "pg_edge:jsonb_path#15",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_path",
+   "query_tz datetime (PG17+)"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT jsonb_path_exists('{\"a\":\"x\"}', '$.a == \"x\".datetime(\"yyyy\")')",
+  "source": "pg_edge:jsonb_path#16",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_path",
+   "datetime() on non-date"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '{\"a\":{\"b\":{\"c\":42}}}'::jsonb -> 'a' ->> 'b' ->> 'c'",
+  "source": "pg_edge:jsonb_ops#17",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_ops",
+   "chained -> / ->>"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '[1,2,3]'::jsonb -> -5, '[1,2,3]'::jsonb ->> -1",
+  "source": "pg_edge:jsonb_ops#18",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_ops",
+   "negative array subscripts"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT * FROM jsonb_each('5')",
+  "source": "pg_edge:jsonb_ops#19",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_ops",
+   "each on scalar"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT jsonb_extract_path_text('{\"a\":null}', 'a', 'b')",
+  "source": "pg_edge:jsonb_ops#20",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_ops",
+   "extract path through null"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TYPE jj AS (x int, y text)"
+  ],
+  "query": "SELECT * FROM jsonb_populate_record('{}'::jj, '{\"x\":\"noint\"}')",
+  "source": "pg_edge:jsonb_ops#21",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_ops",
+   "populate_record type error path"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT jsonb_set('{\"a\":[1,2]}', '{a,9}', '5')",
+  "source": "pg_edge:jsonb_ops#22",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_ops",
+   "set beyond array bounds"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT jsonb_set('{\"a\":1}', '{a,b}', '{}', true)",
+  "source": "pg_edge:jsonb_ops#23",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_ops",
+   "set into scalar create_missing"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT to_jsonb(ROW(1,'a',NULL))",
+  "source": "pg_edge:jsonb_ops#24",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_ops",
+   "to_jsonb composite"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT json_strip_nulls('{\"a\":null,\"b\":[null,1]}')",
+  "source": "pg_edge:jsonb_ops#25",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_ops",
+   "strip_nulls nested array untouched"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '{\"a\":1}'::jsonb ? 'a', '[\"a\",1]'::jsonb ? 'a'",
+  "source": "pg_edge:jsonb_ops#26",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_ops",
+   "? operator on obj/arr"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT jsonb_path_query('{\"a\":[1,2,3]}', '$.a[0 to 2]')",
+  "source": "pg_edge:jsonb_ops#27",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "jsonb_ops",
+   "array slice in path"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT range_agg(r) FROM (VALUES (int4range(1,3)),(int4range(5,7)),(NULL)) v(r)",
+  "source": "pg_edge:range#28",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "range",
+   "range_agg with nulls (PG17+)"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '{[1,3],[5,9]}'::int4multirange + int4range(4,4)",
+  "source": "pg_edge:range#29",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "range",
+   "multirange + bridging range merges"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT range_intersect(int4range(0,10), int4range(5,20))",
+  "source": "pg_edge:range#30",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "range",
+   "range_intersect"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT int4range(0,10) - int4range(3,5)",
+  "source": "pg_edge:range#31",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "range",
+   "non-contiguous range difference"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '{[0,10]}'::int4multirange - '{[3,5]}'::int4multirange",
+  "source": "pg_edge:range#32",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "range",
+   "multirange difference splits"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT lower_inf('(,)'::int8range), upper_inf('(,)'::int8range), isempty('empty'::int8range)",
+  "source": "pg_edge:range#33",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "range",
+   "infinite/empty bounds"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '{[1,3),[3,5)}'::int4multirange",
+  "source": "pg_edge:range#34",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "range",
+   "adjacent ranges normalize"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '[-infinity,infinity]'::tstzrange",
+  "source": "pg_edge:range#35",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "range",
+   "infinite tstzrange"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT daterange('2020-01-01','infinity') * daterange('-infinity','2021-01-01')",
+  "source": "pg_edge:range#36",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "range",
+   "daterange intersect inf bounds"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT * FROM unnest('{[1,2],[4,5]}'::int4multirange)",
+  "source": "pg_edge:range#37",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "range",
+   "unnest multirange"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT int4range(1,5) @> int4range(1,5), int4range(1,5) -|- int4range(5,9)",
+  "source": "pg_edge:range#38",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "range",
+   "containment + adjacency"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT range_agg(int4range(g, g+2)) FROM generate_series(1,20,3) g",
+  "source": "pg_edge:range#39",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "range",
+   "range_agg gaps -> multirange"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '[0,0]'::numrange(0,0) = 'empty'::numrange",
+  "source": "pg_edge:range#40",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "range",
+   "degenerate numrange is empty"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT numrange(0.0, -0.0), numrange(0.0, -0.0) = 'empty'",
+  "source": "pg_edge:range#41",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "range",
+   "-0.0 bound edge"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT make_interval(secs => 9223372036854)",
+  "source": "pg_edge:interval#42",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "interval",
+   "interval overflow via make_interval"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '2147483647 days'::interval + '1 day'::interval",
+  "source": "pg_edge:interval#43",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "interval",
+   "interval day overflow"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT justify_interval('1 year -1 hour'::interval)",
+  "source": "pg_edge:interval#44",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "interval",
+   "justify_interval sign flip"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 'infinity'::timestamp - '-infinity'::timestamp",
+  "source": "pg_edge:interval#45",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "interval",
+   "inf minus -inf"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 'infinity'::timestamptz + '1 day'::interval",
+  "source": "pg_edge:interval#46",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "interval",
+   "inf plus interval stays inf"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT extract(epoch from 'epoch'::timestamp)",
+  "source": "pg_edge:interval#47",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "interval",
+   "epoch of epoch"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT date_bin('15 min', TIMESTAMP '2020-01-01 00:14', TIMESTAMP '2001-01-01')",
+  "source": "pg_edge:interval#48",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "interval",
+   "date_bin basic"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT date_bin('0 sec', TIMESTAMP '2020-01-01', TIMESTAMP '2001-01-01')",
+  "source": "pg_edge:interval#49",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "interval",
+   "date_bin zero stride"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT date_bin('-1 hour', TIMESTAMP '2020-01-01', TIMESTAMP '2001-01-01')",
+  "source": "pg_edge:interval#50",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "interval",
+   "date_bin negative stride"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT make_timestamp(2020,13,45,25,61,61)",
+  "source": "pg_edge:interval#51",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "interval",
+   "make_timestamp overflow"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT make_timestamptz(2020,1,1,0,0,0,'Mars/Olympus')",
+  "source": "pg_edge:interval#52",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "interval",
+   "make_timestamptz bad zone"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT age('infinity'::timestamp)",
+  "source": "pg_edge:interval#53",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "interval",
+   "age of infinity"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '1 hour'::interval / 0",
+  "source": "pg_edge:interval#54",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "interval",
+   "interval div zero"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '2000-01-01'::timestamp - 'infinity'::timestamp",
+  "source": "pg_edge:interval#55",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "interval",
+   "ts minus inf"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '2001-02-16 20:38:40'::timestamptz AT TIME ZONE 'Invalid/Zone'",
+  "source": "pg_edge:interval#56",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "interval",
+   "AT TIME ZONE bad zone"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT to_timestamp('2024-13-45','YYYY-MM-DD')",
+  "source": "pg_edge:interval#57",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "interval",
+   "to_timestamp bad date"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT date_trunc('microsecond','2001-02-16 20:38:40.123456'::timestamp)",
+  "source": "pg_edge:interval#58",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "interval",
+   "date_trunc microsecond"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '999999-12-31'::timestamp",
+  "source": "pg_edge:interval#59",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "interval",
+   "huge year timestamp"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '-4713-01-01'::date + (-1)",
+  "source": "pg_edge:interval#60",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "interval",
+   "date below minimum"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 'NaN'::numeric + 1, 'NaN'::numeric > 'Infinity'::numeric, 'NaN'::numeric = 'NaN'::numeric",
+  "source": "pg_edge:numeric#61",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "NaN arithmetic and ordering"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 'Infinity'::numeric * '-Infinity'::numeric, 'Infinity'::numeric / 0, 'Infinity'::numeric % 1",
+  "source": "pg_edge:numeric#62",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "numeric infinity ops"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 1::numeric/0",
+  "source": "pg_edge:numeric#63",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "numeric div zero"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT (10::numeric ^ 131071)",
+  "source": "pg_edge:numeric#64",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "numeric max exponent"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT (10::numeric ^ 131072)",
+  "source": "pg_edge:numeric#65",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "numeric overflow exp"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '9223372036854775808'::int8",
+  "source": "pg_edge:numeric#66",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "int8 literal +1"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '9223372036854775807'::int8 + 1",
+  "source": "pg_edge:numeric#67",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "int8 max +1"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT abs(-9223372036854775808::int8)",
+  "source": "pg_edge:numeric#68",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "abs of int8 min"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 2147483647::int4 + 1",
+  "source": "pg_edge:numeric#69",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "int4 overflow"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT (-2147483648)::int4",
+  "source": "pg_edge:numeric#70",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "int4 min literal quirk"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 5/0, 5.0/0",
+  "source": "pg_edge:numeric#71",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "int and numeric div zero"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 5%0",
+  "source": "pg_edge:numeric#72",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "int mod zero"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT mod(5,0)",
+  "source": "pg_edge:numeric#73",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "mod() zero"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 2::int8 ^ 63::int8",
+  "source": "pg_edge:numeric#74",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "int8 pow overflow"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT (1::numeric/3)::numeric(10,5)",
+  "source": "pg_edge:numeric#75",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "numeric scale cast"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 123.456::numeric(3,0)",
+  "source": "pg_edge:numeric#76",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "precision squeeze err"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT round('NaN'::numeric), trunc(123.456, -5)",
+  "source": "pg_edge:numeric#77",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "round NaN / negative trunc"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT trunc(1.5::numeric, 1000)",
+  "source": "pg_edge:numeric#78",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "huge trunc digits"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT width_bucket(5, 0, 10, 0)",
+  "source": "pg_edge:numeric#79",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "width_bucket zero count"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT width_bucket('NaN'::numeric, 1,10,5)",
+  "source": "pg_edge:numeric#80",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "width_bucket NaN operand"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 25!",
+  "source": "pg_edge:numeric#81",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "factorial numeric"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT (-1)!",
+  "source": "pg_edge:numeric#82",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "factorial negative"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT sqrt(-1::numeric)",
+  "source": "pg_edge:numeric#83",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "sqrt negative"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT ln(-1)",
+  "source": "pg_edge:numeric#84",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "ln negative"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT exp(10000)",
+  "source": "pg_edge:numeric#85",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "float exp overflow -> inf"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 'NaN'::float8 = 'NaN'::float8, 'Infinity'::float8 - 'Infinity'::float8",
+  "source": "pg_edge:numeric#86",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "float NaN eq, inf-inf"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 1e308::float8 * 10, -1e308::float8 * 10",
+  "source": "pg_edge:numeric#87",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "float8 overflow to inf"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 1::int4 << 33, 5::int4 >> 100",
+  "source": "pg_edge:numeric#88",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "shift beyond width"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '1 2 3'::int2vector, 'a'::oidvector",
+  "source": "pg_edge:numeric#89",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "vector casts"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 0.0/0.0",
+  "source": "pg_edge:numeric#90",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "float div zero"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT numeric '0.00000000000000000000001' * 0.1",
+  "source": "pg_edge:numeric#91",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "numeric",
+   "tiny scale multiply"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT format('%s %L %I', NULL, NULL, NULL)",
+  "source": "pg_edge:text#92",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "format all specifiers NULL"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT format('%5$s', 'a')",
+  "source": "pg_edge:text#93",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "format out-of-range ref"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT format('%s%s', 'a')",
+  "source": "pg_edge:text#94",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "format too few args"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT position('' in 'abc'), position('abc' in 'abcabc')",
+  "source": "pg_edge:text#95",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "position edge"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT substr('abcdef', -2, 3), substr('abc', 0, 5)",
+  "source": "pg_edge:text#96",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "substr negative/zero start"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT substr('abc',2,-1)",
+  "source": "pg_edge:text#97",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "substr negative len"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT left('abc', -5), right('abc', -5)",
+  "source": "pg_edge:text#98",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "left/right negative"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 'stra\u00dfe' ILIKE 'STRASSE'",
+  "source": "pg_edge:text#99",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "unicode ilike"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT lower('\u0130'), upper('\u00df')",
+  "source": "pg_edge:text#100",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "multichar case fold"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT normalize('H\u00e9llo', 'nfkd')",
+  "source": "pg_edge:text#101",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "unicode normalize"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 'a' COLLATE \"C\" < 'B' COLLATE \"POSIX\"",
+  "source": "pg_edge:text#102",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "cross collation compare"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT chr(0)",
+  "source": "pg_edge:text#103",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "chr zero"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT chr(55296)",
+  "source": "pg_edge:text#104",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "chr surrogate"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT repeat('x', 0), repeat('ab', -1)",
+  "source": "pg_edge:text#105",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "repeat non-positive"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT to_char(1.5, 'FM999.99')",
+  "source": "pg_edge:text#106",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "to_char float fmt"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT to_number('12,34','99D99')",
+  "source": "pg_edge:text#107",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "to_number bad input"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT split_part('a,b,c', ',', -1)",
+  "source": "pg_edge:text#108",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "split_part negative"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT split_part('a,b',',',0)",
+  "source": "pg_edge:text#109",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "split_part zero"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT string_to_array('abc', NULL)",
+  "source": "pg_edge:text#110",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "string_to_array null delim"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT string_to_array('a,,b',',',NULL)",
+  "source": "pg_edge:text#111",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "string_to_array null placeholder"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT md5(''), encode('abc','base64')",
+  "source": "pg_edge:text#112",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "md5 empty / encode"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT decode('!!','base64'), decode('zz','hex')",
+  "source": "pg_edge:text#113",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "decode garbage"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT quote_ident('a\"b'), quote_literal(E'a\\'b')",
+  "source": "pg_edge:text#114",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "quote edge"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT regexp_replace('aaa','a*','X','g')",
+  "source": "pg_edge:text#115",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "regexp zero-width global replace"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT regexp_match('abc', '(')",
+  "source": "pg_edge:text#116",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "malformed regexp"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT (regexp_match('a','a'))[2]",
+  "source": "pg_edge:text#117",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "match group miss"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT regexp_replace('abc', 'x{1000}', 'y')",
+  "source": "pg_edge:text#118",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "regexp bounded repeat"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 'a' LIKE 'a' ESCAPE ''",
+  "source": "pg_edge:text#119",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "empty escape char"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT ascii(''), to_hex(-1)",
+  "source": "pg_edge:text#120",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "ascii empty / to_hex neg"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT lpad('abc', 10, ''), lpad('abc', -1)",
+  "source": "pg_edge:text#121",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "lpad empty fill / negative"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT starts_with('abc','')",
+  "source": "pg_edge:text#122",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "starts_with empty"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT btrim('abc', 'cab')",
+  "source": "pg_edge:text#123",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "btrim all chars"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT overlay('Txxxxas' placing 'hom' from -1 for 3)",
+  "source": "pg_edge:text#124",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "overlay negative from"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT translate('abcdef', 'def', 'xy')",
+  "source": "pg_edge:text#125",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "translate shrink"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 'abc' SIMILAR TO '%(a|b)%' ESCAPE ''",
+  "source": "pg_edge:text#126",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "text",
+   "similar-to empty escape"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT array_agg(x) FROM (VALUES (NULL),(NULL)) v(x)",
+  "source": "pg_edge:array#127",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "array_agg of nulls"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT array_agg(x) FROM (SELECT 1 WHERE false) v(x)",
+  "source": "pg_edge:array#128",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "array_agg empty -> null"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT (ARRAY[1,2,3,4,5])[0:2]",
+  "source": "pg_edge:array#129",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "slice with zero lower bound"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT (ARRAY[1,2,3])[2:1]",
+  "source": "pg_edge:array#130",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "empty slice"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT (ARRAY[1,2,3])[-2147483648]",
+  "source": "pg_edge:array#131",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "subscript int min"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT * FROM unnest(ARRAY[1,2,3]) WITH ORDINALITY",
+  "source": "pg_edge:array#132",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "unnest ordinality"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT ARRAY[[1,2],[3,4]], (ARRAY[[1,2],[3,4]])[2][1]",
+  "source": "pg_edge:array#133",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "multidim array"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT ARRAY[[1],[2,3]]",
+  "source": "pg_edge:array#134",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "ragged multidim"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT * FROM unnest(ARRAY[[1,2],[3,4]]) WITH ORDINALITY",
+  "source": "pg_edge:array#135",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "unnest multidim ordinality"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT array_to_string(ARRAY[1,NULL,3], ',')",
+  "source": "pg_edge:array#136",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "array_to_string skips null"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT array_to_string(ARRAY[1,2], ',', 'X')",
+  "source": "pg_edge:array#137",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "array_to_string null string"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT string_to_array('a,b',',') || 'x'",
+  "source": "pg_edge:array#138",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "array concat element"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT array_position(ARRAY[1,NULL,3], NULL)",
+  "source": "pg_edge:array#139",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "position of null"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT array_remove(ARRAY[1,NULL,1], NULL)",
+  "source": "pg_edge:array#140",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "remove nulls"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT cardinality(ARRAY[]::int[]), cardinality(ARRAY[[1,2],[3,4]])",
+  "source": "pg_edge:array#141",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "cardinality"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT array_dims('{}'::int[])",
+  "source": "pg_edge:array#142",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "dims of empty"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT array_fill(0, ARRAY[-1])",
+  "source": "pg_edge:array#143",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "array_fill negative"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT array_fill('x', ARRAY[2], ARRAY[3])",
+  "source": "pg_edge:array#144",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "array_fill lower bound"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT ARRAY[1,2] @> ARRAY[NULL], NULL::int[] @> ARRAY[1]",
+  "source": "pg_edge:array#145",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "containment null"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT array_cat(ARRAY[1], NULL::int[]), ARRAY[1] || NULL::int[]",
+  "source": "pg_edge:array#146",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "cat null array"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT (ARRAY[]::int[])[1]",
+  "source": "pg_edge:array#147",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "subscript empty"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT (ARRAY[[1,2],[3,4]])[0:1][1]",
+  "source": "pg_edge:array#148",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "multidim slice zero bound"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT array_prepend(0, ARRAY[1,2]), array_append(ARRAY[1,2], 0)",
+  "source": "pg_edge:array#149",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "prepend/append"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT ARRAY(SELECT x FROM (VALUES(1),(2)) v(x))",
+  "source": "pg_edge:array#150",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "array",
+   "array from subquery"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT x, sum(x) OVER (ORDER BY x GROUPS BETWEEN 1 PRECEDING AND CURRENT ROW EXCLUDE TIES) FROM (VALUES (1),(1),(2)) v(x) ORDER BY x",
+  "source": "pg_edge:window#151",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "window",
+   "GROUPS frame EXCLUDE TIES"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT x, sum(x) OVER (ORDER BY x GROUPS BETWEEN CURRENT ROW AND CURRENT ROW EXCLUDE GROUP) FROM (VALUES (1),(1),(2)) v(x) ORDER BY x",
+  "source": "pg_edge:window#152",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "window",
+   "GROUPS frame EXCLUDE GROUP"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT x, sum(x) OVER (ORDER BY x ROWS BETWEEN 1 PRECEDING AND CURRENT ROW EXCLUDE CURRENT ROW) FROM (VALUES (1),(2)) v(x) ORDER BY x",
+  "source": "pg_edge:window#153",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "window",
+   "EXCLUDE CURRENT ROW"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT x, nth_value(x, 0) OVER (ORDER BY x) FROM (VALUES(1),(2)) v(x)",
+  "source": "pg_edge:window#154",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "window",
+   "nth_value zero"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT x, nth_value(x, -1) OVER (ORDER BY x) FROM (VALUES(1),(2)) v(x)",
+  "source": "pg_edge:window#155",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "window",
+   "nth_value negative"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT x, lead(x, -1) OVER (ORDER BY x) FROM (VALUES(1)) v(x)",
+  "source": "pg_edge:window#156",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "window",
+   "lead negative offset"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT sum(x) OVER (ORDER BY d RANGE BETWEEN INTERVAL '1 day' PRECEDING AND CURRENT ROW) FROM (VALUES (1,'2020-01-01'::date),(2,'2020-01-02'::date),(3,'2020-01-02'::date)) v(x,d) ORDER BY d",
+  "source": "pg_edge:window#157",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "window",
+   "RANGE interval offset on date"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT row_number() OVER (), rank() OVER (ORDER BY NULL)",
+  "source": "pg_edge:window#158",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "window",
+   "ungrouped window + null order"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT count(*) FILTER (WHERE x>1) OVER () FROM (VALUES(1),(2)) v(x)",
+  "source": "pg_edge:window#159",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "window",
+   "aggregate FILTER as window"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT x, string_agg(x::text, ',') OVER (ORDER BY x ROWS UNBOUNDED PRECEDING) FROM (VALUES(1),(2),(3)) v(x) ORDER BY x",
+  "source": "pg_edge:window#160",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "window",
+   "string_agg running"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT x, first_value(x) OVER w, last_value(x) OVER w FROM (VALUES(1),(2)) v(x) WINDOW w AS (ORDER BY x ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) ORDER BY x",
+  "source": "pg_edge:window#161",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "window",
+   "named window frame"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT B'1010' & B'1100', B'1010' >> 2, B'1010'::bit(2)",
+  "source": "pg_edge:bit#162",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "bit",
+   "bit ops and truncation"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '10102'::bit(4)",
+  "source": "pg_edge:bit#163",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "bit",
+   "bad bit string"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT bit_count(B'1111'), bit_and(b) FROM (VALUES (B'11'),(B'10')) v(b)",
+  "source": "pg_edge:bit#164",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "bit",
+   "bit_count / bit_and"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '\\xdeadbeef'::bytea || '\\x00'::bytea",
+  "source": "pg_edge:bytea#165",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "bytea",
+   "bytea concat"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT get_bit('\\xff'::bytea, 0), get_bit('\\xff'::bytea, 7)",
+  "source": "pg_edge:bytea#166",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "bytea",
+   "get_bit bounds"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT get_bit('\\xff'::bytea, 9)",
+  "source": "pg_edge:bytea#167",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "bytea",
+   "get_bit out of range"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT substring('\\xdeadbeef'::bytea from 2 for 2), position('\\xbe'::bytea in '\\xdeadbeef'::bytea)",
+  "source": "pg_edge:bytea#168",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "bytea",
+   "bytea substr/pos"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '\\x'::bytea, octet_length('\\x00ff'::bytea)",
+  "source": "pg_edge:bytea#169",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "bytea",
+   "empty bytea + length"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT byteaout(byteain('\\x00'))",
+  "source": "pg_edge:bytea#170",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "bytea",
+   "bytea in/out cycle"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11'::uuid, 'not-a-uuid'::uuid",
+  "source": "pg_edge:uuid#171",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "uuid",
+   "uuid good and bad"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT uuidv7(), uuid_extract_version(uuidv7())",
+  "source": "pg_edge:uuid#172",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "uuid",
+   "uuidv7 (PG18+)"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT uuid_extract_timestamp('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11')",
+  "source": "pg_edge:uuid#173",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "uuid",
+   "extract ts from non-v7 uuid"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '08:00:2b:01:02:03'::macaddr = macaddr '08-00-2B-01-02-03', trunc('08:00:2b:01:02:03'::macaddr)",
+  "source": "pg_edge:macaddr#174",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "macaddr",
+   "macaddr eq + trunc"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '08:00:2b:01:02:03:04:05'::macaddr8, macaddr8_set7bit('08:00:2b:01:02:03:04:05'::macaddr8)",
+  "source": "pg_edge:macaddr#175",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "macaddr",
+   "macaddr8"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '10.0.0.1/8'::inet, '10.0.0.1/8'::cidr",
+  "source": "pg_edge:inet#176",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "inet",
+   "inet vs cidr host bits"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '10.0.0.1'::inet - '10.0.0.5'::inet, host('10.0.0.1/8'::inet), masklen('10.0.0.1/24'::inet)",
+  "source": "pg_edge:inet#177",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "inet",
+   "inet arith"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '255.255.255.255'::inet + 1",
+  "source": "pg_edge:inet#178",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "inet",
+   "inet max + 1"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT set_masklen('10.0.0.1/24'::inet, 8), '10/8'::cidr, netmask('10.0.0.1/24'::inet)",
+  "source": "pg_edge:inet#179",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "inet",
+   "mask ops"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '::1'::inet, '2001:db8::/32'::cidr",
+  "source": "pg_edge:inet#180",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "inet",
+   "ipv6"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '100.50'::money + '0.01'::money",
+  "source": "pg_edge:money#181",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "money",
+   "money addition"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 'NaN'::money",
+  "source": "pg_edge:money#182",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "money",
+   "money NaN"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '1e5'::money",
+  "source": "pg_edge:money#183",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "money",
+   "money sci notation"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '0/0'::pg_lsn, 'FFFFFFFF/FFFFFFFF'::pg_lsn",
+  "source": "pg_edge:pg_lsn#184",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "pg_lsn",
+   "pg_lsn bounds"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '0/0'::pg_lsn - '1/0'::pg_lsn",
+  "source": "pg_edge:pg_lsn#185",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "pg_lsn",
+   "pg_lsn negative diff"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT pg_lsn '0/1' + 1, '2/0'::pg_lsn - '1/0'::pg_lsn",
+  "source": "pg_edge:pg_lsn#186",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "pg_lsn",
+   "pg_lsn arith"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '(0,1)'::tid, '(4294967295,65535)'::tid",
+  "source": "pg_edge:tid#187",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "tid",
+   "tid bounds"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 'int4'::regtype, 'nonexistent_xyz'::regclass",
+  "source": "pg_edge:regtype#188",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "regtype",
+   "regtype ok / regclass miss"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT int4send(5)",
+  "source": "pg_edge:sendrecv#189",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sendrecv",
+   "int4send binary out"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT int4recv('\\x00000005'::bytea)",
+  "source": "pg_edge:sendrecv#190",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sendrecv",
+   "int4recv 5 bytes"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT int4recv('\\x01'::bytea)",
+  "source": "pg_edge:sendrecv#191",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sendrecv",
+   "int4recv short buffer"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT int4recv(''::bytea)",
+  "source": "pg_edge:sendrecv#192",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sendrecv",
+   "int4recv empty"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT numeric_recv(numeric_send(1.5))",
+  "source": "pg_edge:sendrecv#193",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sendrecv",
+   "numeric send/recv roundtrip"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT record_send(ROW(1,'a'))",
+  "source": "pg_edge:sendrecv#194",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sendrecv",
+   "record_send"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT unknownsend('x'::unknown)",
+  "source": "pg_edge:sendrecv#195",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sendrecv",
+   "unknownsend"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT float8recv('x'::bytea)",
+  "source": "pg_edge:sendrecv#196",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sendrecv",
+   "float8recv 1 byte"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT point_recv('\\x0001'::bytea)",
+  "source": "pg_edge:sendrecv#197",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sendrecv",
+   "point_recv short"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT textrecv('abc'::bytea)",
+  "source": "pg_edge:sendrecv#198",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sendrecv",
+   "textrecv raw"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT charsend('a'::\"char\"), namesend('n'::name)",
+  "source": "pg_edge:sendrecv#199",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sendrecv",
+   "char/name send"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT pg_typeof(NULL), pg_typeof(ROW(1,'a'))",
+  "source": "pg_edge:sysfunc#200",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "pg_typeof unknown + record"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT format_type(23, -1), format_type(1043, 10), format_type(-1, -1)",
+  "source": "pg_edge:sysfunc#201",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "format_type incl bad oid"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT format_type(25, 4294967295)",
+  "source": "pg_edge:sysfunc#202",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "format_type max typmod"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT to_regclass('pg_class'), to_regclass('nosuch'), to_regtype('foo')",
+  "source": "pg_edge:sysfunc#203",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "to_reg* null vs err"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT to_regproc('abs'), to_regproc('foo'), to_regnamespace('foo'), to_regrole('nosuchrole')",
+  "source": "pg_edge:sysfunc#204",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "to_reg* nulls"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT has_table_privilege('pg_class','SELECT'), has_table_privilege('nosuchtable','SELECT')",
+  "source": "pg_edge:sysfunc#205",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "privilege checks"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT has_column_privilege('pg_class','oid','SELECT'), has_schema_privilege('public','CREATE'), has_database_privilege('postgres','CONNECT')",
+  "source": "pg_edge:sysfunc#206",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "more privilege"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT has_function_privilege('abs(int)','EXECUTE'), has_tablespace_privilege('pg_default','CREATE'), has_language_privilege('sql','USAGE')",
+  "source": "pg_edge:sysfunc#207",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "func/tblspc/lang priv"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT has_sequence_privilege('nosuch','USAGE')",
+  "source": "pg_edge:sysfunc#208",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "seq priv missing obj"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT pg_total_relation_size('pg_class'), pg_relation_size('nosuch')",
+  "source": "pg_edge:sysfunc#209",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "pg_size_* miss"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT pg_column_size(ROW(1,'a')), pg_size_pretty(-1), pg_size_pretty(9223372036854775807)",
+  "source": "pg_edge:sysfunc#210",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "pg_size edge"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT pg_size_bytes('1 PB'), pg_size_bytes('-1 GB'), pg_size_bytes('1XB')",
+  "source": "pg_edge:sysfunc#211",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "pg_size_bytes bad unit"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT current_setting('nosuch'), current_setting('nosuch', true)",
+  "source": "pg_edge:sysfunc#212",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "current_setting missing"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT pg_get_expr('a > 0', 'pg_class'::regclass), pg_get_expr('nonsense((', 'pg_class'::regclass)",
+  "source": "pg_edge:sysfunc#213",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "pg_get_expr deparse incl garbage"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT pg_get_expr('', 'pg_class'::regclass)",
+  "source": "pg_edge:sysfunc#214",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "pg_get_expr empty"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT pg_get_constraintdef(0), pg_get_indexdef(0), pg_get_viewdef('pg_class'::regclass)",
+  "source": "pg_edge:sysfunc#215",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "getdef bad oid"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT pg_get_userbyid(0), pg_get_userbyid(1)",
+  "source": "pg_edge:sysfunc#216",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "userbyid unknown oid"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT col_description('pg_class'::regclass, 0), obj_description(0)",
+  "source": "pg_edge:sysfunc#217",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "descriptions edge"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT pg_encoding_to_char(-1), pg_char_to_encoding('BOGUS'), pg_char_to_encoding('UTF8')",
+  "source": "pg_edge:sysfunc#218",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "encoding lookup"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT pg_filenode_relation(0, 1259), pg_relation_filenode('pg_class')",
+  "source": "pg_edge:sysfunc#219",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "filenode lookup"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT pg_get_serial_sequence('pg_class','oid')",
+  "source": "pg_edge:sysfunc#220",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "serial sequence none"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT txid_current(), pg_current_xact_id()",
+  "source": "pg_edge:sysfunc#221",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "xact id funcs"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT pg_postmaster_start_time(), pg_backend_pid()",
+  "source": "pg_edge:sysfunc#222",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "backend info"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 'a > 0'::pg_node_tree",
+  "source": "pg_edge:sysfunc#223",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "pg_node_tree cast"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '1+1'::pg_node_tree",
+  "source": "pg_edge:sysfunc#224",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "pg_node_tree expr input"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT ROW(1,2) = ROW(1,2), 1 = ALL(ARRAY[1,2])",
+  "source": "pg_edge:sysfunc#225",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "record eq / ALL"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT pg_table_is_visible('pg_class'::regclass), pg_function_is_visible('abs'::regproc)",
+  "source": "pg_edge:sysfunc#226",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "sysfunc",
+   "visibility funcs"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "WITH RECURSIVE r(n) AS (SELECT 1 UNION ALL SELECT n+1 FROM r WHERE n < 10) SELECT count(*) FROM r",
+  "source": "pg_edge:cte#227",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "cte",
+   "recursive count"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "WITH RECURSIVE r(n) AS (SELECT 1 UNION ALL SELECT n FROM r) SELECT n FROM r LIMIT 5",
+  "source": "pg_edge:cte#228",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "cte",
+   "nonterminating recursive + LIMIT"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "WITH RECURSIVE g(n) AS (SELECT 1 UNION ALL SELECT n FROM g CYCLE n SET c USING p) SELECT count(*) FROM g",
+  "source": "pg_edge:cte#229",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "cte",
+   "CYCLE self-detect"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "WITH RECURSIVE r(n,p) AS (VALUES(1,ARRAY[1]) UNION ALL SELECT n+1, p||n+1 FROM r WHERE n<5) SEARCH DEPTH FIRST BY n SET o SELECT * FROM r ORDER BY o",
+  "source": "pg_edge:cte#230",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "cte",
+   "SEARCH DEPTH FIRST"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "WITH m AS MATERIALIZED (SELECT 'k' v) SELECT (SELECT v FROM m) = (SELECT v FROM m)",
+  "source": "pg_edge:cte#231",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "cte",
+   "MATERIALIZED hint determinism"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "WITH m AS NOT MATERIALIZED (SELECT 1 v) SELECT * FROM m",
+  "source": "pg_edge:cte#232",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "cte",
+   "NOT MATERIALIZED hint"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "WITH m(v) AS (SELECT 1) SELECT * FROM m AS a JOIN m AS b USING (v)",
+  "source": "pg_edge:cte#233",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "cte",
+   "CTE self join"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT * FROM (VALUES(1),(2)) a(x), LATERAL (SELECT x*2) b",
+  "source": "pg_edge:lateral#234",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "lateral",
+   "basic lateral"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT * FROM (VALUES(1)) a, LATERAL (SELECT 1 WHERE false) b",
+  "source": "pg_edge:lateral#235",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "lateral",
+   "lateral empty right"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE lt(a int, j jsonb)",
+   "INSERT INTO lt VALUES (1,'{\"x\":1}'),(2,'{\"y\":2}')"
+  ],
+  "query": "SELECT a, k.key FROM lt, LATERAL jsonb_each(lt.j) k ORDER BY a",
+  "source": "pg_edge:lateral#236",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "lateral",
+   "lateral set-returning function"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT * FROM (VALUES(1)) a(x) LEFT JOIN LATERAL (SELECT x WHERE x > 5) b ON true",
+  "source": "pg_edge:lateral#237",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "lateral",
+   "lateral left join"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT x, (SELECT max(y) FROM generate_series(1,x) y) FROM (VALUES(2),(3)) v(x) ORDER BY x",
+  "source": "pg_edge:lateral#238",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "lateral",
+   "correlated srf subquery"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE ts AS SELECT i FROM generate_series(1,200) i"
+  ],
+  "query": "SELECT count(*) FROM ts TABLESAMPLE SYSTEM (0)",
+  "source": "pg_edge:tablesample#239",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "tablesample",
+   "system 0%"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE ts AS SELECT i FROM generate_series(1,200) i"
+  ],
+  "query": "SELECT count(*) FROM ts TABLESAMPLE SYSTEM (100)",
+  "source": "pg_edge:tablesample#240",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "tablesample",
+   "system 100%"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE ts AS SELECT i FROM generate_series(1,200) i"
+  ],
+  "query": "SELECT count(*) FROM ts TABLESAMPLE BERNOULLI (0)",
+  "source": "pg_edge:tablesample#241",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "tablesample",
+   "bernoulli 0%"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE ts AS SELECT i FROM generate_series(1,200) i"
+  ],
+  "query": "SELECT count(*) FROM ts TABLESAMPLE SYSTEM (50) REPEATABLE (42)",
+  "source": "pg_edge:tablesample#242",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "tablesample",
+   "repeatable seed deterministic"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE ts AS SELECT i FROM generate_series(1,200) i"
+  ],
+  "query": "SELECT count(*) FROM ts TABLESAMPLE BERNOULLI (-1)",
+  "source": "pg_edge:tablesample#243",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "tablesample",
+   "negative sample pct"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE ts AS SELECT i FROM generate_series(1,200) i"
+  ],
+  "query": "SELECT count(*) FROM ts TABLESAMPLE SYSTEM (101)",
+  "source": "pg_edge:tablesample#244",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "tablesample",
+   "sample > 100%"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT (SELECT x FROM (VALUES(1),(2)) v(x))",
+  "source": "pg_edge:misc#245",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "scalar subquery multirow"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT NULLIF(1,1), COALESCE(NULL,NULL)",
+  "source": "pg_edge:misc#246",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "nullif hit + unknown coalesce"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 1 UNION ALL SELECT 'a'",
+  "source": "pg_edge:misc#247",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "union type conflict"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT NULL UNION SELECT NULL",
+  "source": "pg_edge:misc#248",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "union of nulls"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "VALUES (1,2),(3)",
+  "source": "pg_edge:misc#249",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "ragged VALUES"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 1 INTERSECT SELECT 1 EXCEPT SELECT 2",
+  "source": "pg_edge:misc#250",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "set-op precedence"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 1 GROUP BY 1 HAVING count(*)>=0",
+  "source": "pg_edge:misc#251",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "aggregate HAVING no table"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT count(*) FROM (SELECT 1 WHERE false) s",
+  "source": "pg_edge:misc#252",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "count empty"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT DISTINCT ON (x) x, y FROM (VALUES(1,'a'),(1,'b'),(2,'c')) v(x,y) ORDER BY x, y",
+  "source": "pg_edge:misc#253",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "distinct on"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT CASE WHEN false THEN 1 END",
+  "source": "pg_edge:misc#254",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "case no else null"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT x FROM (SELECT 1 x) s WHERE x IN (SELECT 1)",
+  "source": "pg_edge:misc#255",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "IN scalar subquery"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "TABLE pg_class LIMIT 0",
+  "source": "pg_edge:misc#256",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "TABLE stmt limit 0"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT * FROM pg_class WHERE oid = 0",
+  "source": "pg_edge:misc#257",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "catalog oid zero"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE DOMAIN posint AS int CHECK (VALUE > 0)"
+  ],
+  "query": "SELECT '5'::posint, '-3'::posint",
+  "source": "pg_edge:misc#258",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "domain cast ok + violate"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TYPE mood AS ENUM ('sad','ok','happy')"
+  ],
+  "query": "SELECT enum_range(NULL::mood), 'ok'::mood < 'sad'::mood",
+  "source": "pg_edge:misc#259",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "enum_range + ordering"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT x, count(*) OVER () FROM (VALUES(1),(1)) v(x) GROUP BY x ORDER BY x",
+  "source": "pg_edge:misc#260",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "window over grouped"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT generate_series(1,0), * FROM generate_series(0,0) g",
+  "source": "pg_edge:misc#261",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "empty srf targets"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT * FROM generate_series(1,3) WITH ORDINALITY AS t(i,o)",
+  "source": "pg_edge:misc#262",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "srf ordinality alias"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 1 = ANY(ARRAY[1,2]), 3 <> ALL(ARRAY[1,2])",
+  "source": "pg_edge:misc#263",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "ANY/ALL array"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT NOT NULL, NULL IS NOT TRUE, NULL IS UNKNOWN",
+  "source": "pg_edge:misc#264",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "null boolean edges"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT x.* FROM (VALUES (ROW(1,'a'),2)) v(x)",
+  "source": "pg_edge:misc#265",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "column of composite"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT (r).a, (r).b FROM (SELECT ROW(1,'x') r) s",
+  "source": "pg_edge:misc#266",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "field select composite"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT * FROM (VALUES (1,'a'),(2,'b')) AS v(a,b) ORDER BY b LIMIT 1",
+  "source": "pg_edge:misc#267",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "values alias cols"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 'all'::\"char\", 'z'::char(1), ''::char(1)",
+  "source": "pg_edge:misc#268",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "char(1) edges"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT ' 5 '::int, E'\\t7'::int",
+  "source": "pg_edge:misc#269",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "whitespace int cast"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '0x1F'::int",
+  "source": "pg_edge:misc#270",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "hex literal cast int"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '0b101'::int, '0o17'::int",
+  "source": "pg_edge:misc#271",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "binary/octal literal cast"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '1_000'::int",
+  "source": "pg_edge:misc#272",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "underscore literal cast"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '+Inf'::float8, 'iNfInItY'::float8, 'nan'::float8",
+  "source": "pg_edge:misc#273",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "case-insensitive float specials"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 'infinity'::float8::numeric",
+  "source": "pg_edge:misc#274",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "float inf to numeric"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 'infinity'::numeric::float8",
+  "source": "pg_edge:misc#275",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "numeric inf to float"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '1.5e2'::int4",
+  "source": "pg_edge:misc#276",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "float-syntax int cast"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '5.'::int, '.5'::float8",
+  "source": "pg_edge:misc#277",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "edge number formats"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT extract(century from '2001-01-01'::date), extract(millennium from '0999-01-01'::date)",
+  "source": "pg_edge:misc#278",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "extract big units"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT date_part('epoch', '00:00:01'::interval)",
+  "source": "pg_edge:misc#279",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "date_part epoch interval"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT timestamp '2001-02-16' + interval '25 hours'",
+  "source": "pg_edge:misc#280",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "ts+interval>24h"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '2001-02-30'::date",
+  "source": "pg_edge:misc#281",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "invalid feb 30 date"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '2001-02-16 25:00:00'::time",
+  "source": "pg_edge:misc#282",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "invalid 25h time"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT '25:00'::interval",
+  "source": "pg_edge:misc#283",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "interval 25h valid"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT now() = now(), clock_timestamp() >= now()",
+  "source": "pg_edge:misc#284",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "volatile clocks"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT setseed(0.5), random() = random()",
+  "source": "pg_edge:misc#285",
+  "engine": "postgres",
+  "tags": [
+   "pg_edge",
+   "misc",
+   "setseed determinism"
+  ]
+ }
+]

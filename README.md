@@ -33,6 +33,30 @@ plus standalone verifier scripts where applicable.
 | TiDB | v8.5.8 | [TIDB-A](tidb/TIDB-A_time_overflow.sql) | TIME overflow unchecked in TiDB layer (vs MySQL 9.7.1) | upstream pingcap/tidb#56865 still open |
 | TiDB | v8.5.8 | [TIDB-B](tidb/TIDB-B_decimal_division.sql) | decimal division extra internal precision (compat gap) | low severity |
 
+## Framework (`framework/`)
+
+The code that found these bugs — the CoevoDB LLM Hunter/Fixer
+co-evolution testing framework — lives in
+[framework/](framework/README.md). It is a working snapshot of the
+research codebase: multi-oracle testing (TLP, NoREC, plan-variant,
+cross-engine, crash), coverage-guided generation, σ-signature family
+dedup, and per-engine drivers (DuckDB, PostgreSQL, SQLite, DataFusion,
+TiDB), plus the repair_bench patch/localization benchmark.
+
+Run artifacts (`results/`, `repair_bench/runs/`) are gitignored — the
+published bugs above are the curated outcome of ~200k executions.
+Machine-local paths (PG build prefixes, old venvs, the LLM key file)
+resolve through environment variables via `framework/util/paths.py` —
+see the table in [framework/README.md](framework/README.md#machine-local-paths).
+Secrets stay in the environment (`DEEPSEEK_API_KEY`), never in source.
+
+```bash
+cd framework && pip install -r requirements.txt
+export DEEPSEEK_API_KEY=...
+python main.py --engine duckdb --mode full --iterations 8
+pytest testing/ -q        # no API key required
+```
+
 ## Running the reproducers
 
 Each `.sql` file is self-contained: header comments give version,

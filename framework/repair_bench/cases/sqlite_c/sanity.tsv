@@ -1,0 +1,19 @@
+plain	SELECT hex(unistr('abc'));	616263
+esc4	SELECT hex(unistr('\0041'));	41
+escu	SELECT hex(unistr('B'));	42
+escplus	SELECT hex(unistr('\+000043'));	43
+escU	SELECT hex(unistr('\U00000044'));	44
+backslash	SELECT hex(unistr('a\\b'));	615C62
+accent	SELECT hex(unistr('é'));	C3A9
+null_arg	SELECT hex(unistr(NULL));	
+empty	SELECT hex(unistr(''));	
+del	SELECT hex(unistr('\007f'));	7F
+bmp_2byte	SELECT hex(unistr('߿'));	DFBF
+bmp_3byte	SELECT hex(unistr('ࠀ'));	E0A080
+bmp_max	SELECT hex(unistr('\uffff'));	EFBFBF
+bigU_max	SELECT hex(unistr('\U0010FFFF'));	F48FBFBF
+bad_esc	SELECT unistr('\x');	!ERROR
+short_u	SELECT unistr('\u12'));	!ERROR
+high_plus_text	SELECT unistr('\ud83dX');	!ERROR
+char_ref	SELECT hex(char(128512));	F09F9880
+unicode_ref	SELECT unicode(unistr('\U0001F600'));	128512

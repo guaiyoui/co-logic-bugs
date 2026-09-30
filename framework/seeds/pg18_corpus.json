@@ -1,0 +1,596 @@
+[
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(id INT PRIMARY KEY, a INT, gen INT GENERATED ALWAYS AS (a*2) VIRTUAL)",
+   "INSERT INTO g1 VALUES (1,5),(2,7),(3,NULL),(4,0)"
+  ],
+  "query": "SELECT id, gen FROM g1 WHERE gen > 10 ORDER BY id",
+  "source": "pg18_target:vgencol#0",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "vgencol",
+   "virtual gencol in WHERE"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(id INT PRIMARY KEY, a INT, gen INT GENERATED ALWAYS AS (a*2) VIRTUAL)",
+   "INSERT INTO g1 VALUES (1,5),(2,7),(3,3),(4,0)"
+  ],
+  "query": "SELECT gen, count(*) FROM g1 GROUP BY gen ORDER BY gen",
+  "source": "pg18_target:vgencol#1",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "vgencol",
+   "virtual gencol GROUP BY"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(id INT PRIMARY KEY, a INT, gen INT GENERATED ALWAYS AS (a*2) VIRTUAL)",
+   "INSERT INTO g1 VALUES (1,5),(2,7),(3,3)"
+  ],
+  "query": "SELECT id, gen, rank() OVER (ORDER BY gen) FROM g1 ORDER BY id",
+  "source": "pg18_target:vgencol#2",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "vgencol",
+   "virtual gencol in window"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(id INT PRIMARY KEY, a INT, gen INT GENERATED ALWAYS AS (a*2) VIRTUAL)",
+   "CREATE TABLE g2(k INT, v TEXT)",
+   "INSERT INTO g1 VALUES (1,5),(2,7)",
+   "INSERT INTO g2 VALUES (10,'x'),(14,'y'),(9,'z')"
+  ],
+  "query": "SELECT g1.id, g2.v FROM g1 JOIN g2 ON g1.gen = g2.k ORDER BY g1.id",
+  "source": "pg18_target:vgencol#3",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "vgencol",
+   "virtual gencol join key"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(id INT PRIMARY KEY, a INT, gen INT GENERATED ALWAYS AS (a*2) VIRTUAL)",
+   "INSERT INTO g1 VALUES (1,5) ON CONFLICT (id) DO UPDATE SET a = EXCLUDED.a + 1 RETURNING gen",
+   "INSERT INTO g1 VALUES (1,7) ON CONFLICT (id) DO UPDATE SET a = EXCLUDED.a + 1 RETURNING gen"
+  ],
+  "query": "SELECT id, a, gen FROM g1 ORDER BY id",
+  "source": "pg18_target:vgencol#4",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "vgencol",
+   "EXCLUDED + virtual gen expansion"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(id INT PRIMARY KEY, a INT, gen INT GENERATED ALWAYS AS (a*2) VIRTUAL)",
+   "INSERT INTO g1 VALUES (1,5),(2,7)",
+   "ALTER TABLE g1 ALTER COLUMN gen SET EXPRESSION AS (a*3)"
+  ],
+  "query": "SELECT id, gen FROM g1 ORDER BY id",
+  "source": "pg18_target:vgencol#5",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "vgencol",
+   "ALTER SET EXPRESSION recompute"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE bk(id INT, r INT4RANGE, PRIMARY KEY (id, r WITHOUT OVERLAPS))",
+   "INSERT INTO bk VALUES (1,'[1,5)'),(1,'[5,9)'),(2,'[0,100)')"
+  ],
+  "query": "SELECT id, r FROM bk WHERE r && '[4,6)'::int4range ORDER BY id, r",
+  "source": "pg18_target:overlaps#6",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "overlaps",
+   "temporal PK range overlap probe"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE bk(id INT, r INT4RANGE, PRIMARY KEY (id, r WITHOUT OVERLAPS))",
+   "INSERT INTO bk VALUES (1,'[1,5)'),(1,'[5,9)'),(2,'[0,100)')"
+  ],
+  "query": "SELECT b1.id, b2.id FROM bk b1 JOIN bk b2 ON b1.r -|- b2.r ORDER BY b1.id, b2.id",
+  "source": "pg18_target:overlaps#7",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "overlaps",
+   "adjacent ranges self join"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE bk(id INT, r INT4RANGE, UNIQUE (id, r WITHOUT OVERLAPS))",
+   "INSERT INTO bk VALUES (1,'[1,5)'),(2,'[0,100)')"
+  ],
+  "query": "SELECT count(*) FROM bk WHERE '3'::int <@ r ORDER BY 1",
+  "source": "pg18_target:overlaps#8",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "overlaps",
+   "containment on overlaps constraint"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE ne(a INT, b INT, CHECK (a > b) NOT ENFORCED)",
+   "INSERT INTO ne VALUES (1,5),(10,2),(0,0)"
+  ],
+  "query": "SELECT a FROM ne WHERE a > b ORDER BY a",
+  "source": "pg18_target:not_enforced#9",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "not_enforced",
+   "unenforced check + matching qual"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE ne(a INT, b INT, CHECK (a > 0) NOT ENFORCED)",
+   "INSERT INTO ne VALUES (-1),(5),(NULL)"
+  ],
+  "query": "SELECT count(*) FROM ne WHERE a > 0 OR a IS NULL ORDER BY 1",
+  "source": "pg18_target:not_enforced#10",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "not_enforced",
+   "unenforced check vs NULL"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE rn(id INT PRIMARY KEY, v INT)",
+   "INSERT INTO rn VALUES (1,10),(2,20),(3,30)",
+   "UPDATE rn SET v = v*10 WHERE id >= 2 RETURNING id, old.v, new.v"
+  ],
+  "query": "SELECT id, v FROM rn ORDER BY id",
+  "source": "pg18_target:ret_oldnew#11",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "ret_oldnew",
+   "UPDATE RETURNING old/new"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE rn(id INT PRIMARY KEY, v INT)",
+   "INSERT INTO rn VALUES (1,10),(2,20)",
+   "DELETE FROM rn WHERE id = 1 RETURNING old.id, old.v"
+  ],
+  "query": "SELECT id FROM rn ORDER BY id",
+  "source": "pg18_target:ret_oldnew#12",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "ret_oldnew",
+   "DELETE RETURNING old"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE rn(id INT PRIMARY KEY, v INT)",
+   "INSERT INTO rn VALUES (1,10)",
+   "MERGE INTO rn USING (VALUES (1,5),(2,6)) s(id,d) ON rn.id = s.id WHEN MATCHED THEN UPDATE SET v = v + s.d WHEN NOT MATCHED THEN INSERT VALUES (s.id, s.d) RETURNING merge_action(), old.v, new.v"
+  ],
+  "query": "SELECT id, v FROM rn ORDER BY id",
+  "source": "pg18_target:ret_oldnew#13",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "ret_oldnew",
+   "MERGE RETURNING old/new + merge_action"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE m(id INT PRIMARY KEY, v INT)",
+   "INSERT INTO m VALUES (1,1),(2,2),(3,3)",
+   "MERGE INTO m USING (VALUES (1),(2)) s(id) ON m.id = s.id WHEN NOT MATCHED BY SOURCE THEN DELETE"
+  ],
+  "query": "SELECT id FROM m ORDER BY id",
+  "source": "pg18_target:merge_nmbs#14",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "merge_nmbs",
+   "NMBS delete"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE m(id INT PRIMARY KEY, v INT)",
+   "INSERT INTO m VALUES (1,1),(2,2),(3,3)",
+   "MERGE INTO m USING (VALUES (1),(2)) s(id) ON m.id = s.id WHEN NOT MATCHED BY SOURCE THEN UPDATE SET v = 0"
+  ],
+  "query": "SELECT id, v FROM m ORDER BY id",
+  "source": "pg18_target:merge_nmbs#15",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "merge_nmbs",
+   "NMBS update"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mp(id INT, v INT) PARTITION BY RANGE (id)",
+   "CREATE TABLE mp1 PARTITION OF mp FOR VALUES FROM (0) TO (10)",
+   "CREATE TABLE mp2 PARTITION OF mp FOR VALUES FROM (10) TO (20)",
+   "INSERT INTO mp VALUES (1,1),(15,5)",
+   "MERGE INTO mp USING (VALUES (1)) s(id) ON mp.id = s.id WHEN NOT MATCHED BY SOURCE THEN DELETE"
+  ],
+  "query": "SELECT id FROM mp ORDER BY id",
+  "source": "pg18_target:merge_nmbs#16",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "merge_nmbs",
+   "NMBS on partitioned target"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(id INT PRIMARY KEY, v INT)",
+   "INSERT INTO s1 VALUES (1,1),(2,2),(3,3)"
+  ],
+  "query": "SELECT count(*) FROM s1 a JOIN s1 b ON a.id = b.id JOIN s1 c ON b.id = c.id WHERE a.id < 3",
+  "source": "pg18_target:sje_bait#17",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "sje_bait",
+   "three-way self join on unique"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(id INT PRIMARY KEY, v INT)",
+   "INSERT INTO s1 VALUES (1,1),(2,2),(3,3)"
+  ],
+  "query": "SELECT a.id FROM s1 a JOIN s1 b ON a.id = b.id WHERE a.id IN (SELECT id FROM s1) ORDER BY a.id",
+  "source": "pg18_target:sje_bait#18",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "sje_bait",
+   "self join + self IN subquery"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t0(c2 INT PRIMARY KEY, c3 INT)",
+   "INSERT INTO t0 VALUES (1,10),(2,20)"
+  ],
+  "query": "SELECT count(*) FROM t0 INNER JOIN LATERAL (SELECT t0.c3 UNION ALL SELECT t0.c3) s ON (s.c3 IS NOT NULL) WHERE t0.c2 IN (SELECT c2 FROM t0)",
+  "source": "pg18_target:sje_bait#19",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "sje_bait",
+   "#19626 verbatim shape (SJE+appendrel)"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t0(c2 INT PRIMARY KEY, c3 INT)",
+   "INSERT INTO t0 VALUES (1,10),(2,20)"
+  ],
+  "query": "SELECT count(*) FROM t0 INNER JOIN LATERAL (SELECT t0.c3 UNION ALL SELECT t0.c3 + 1) s ON (s.c3 IS NOT NULL) WHERE t0.c2 IN (SELECT c2 FROM t0)",
+  "source": "pg18_target:sje_bait#20",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "sje_bait",
+   "appendrel arms differ"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t0(c2 INT PRIMARY KEY, c3 INT, c4 INT)",
+   "INSERT INTO t0 VALUES (1,10,7),(2,20,8)"
+  ],
+  "query": "SELECT count(*) FROM t0 INNER JOIN LATERAL (SELECT t0.c3 UNION ALL SELECT t0.c4) s ON (s.c3 IS NOT NULL) WHERE t0.c2 IN (SELECT c2 FROM t0)",
+  "source": "pg18_target:sje_bait#21",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "sje_bait",
+   "appendrel arms diff cols"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t0(c2 INT UNIQUE, c3 INT)",
+   "INSERT INTO t0 VALUES (1,10),(2,20)"
+  ],
+  "query": "SELECT count(*) FROM t0 INNER JOIN LATERAL (SELECT t0.c3 UNION ALL SELECT t0.c3) s ON (s.c3 IS NOT NULL) WHERE t0.c2 IN (SELECT c2 FROM t0)",
+  "source": "pg18_target:sje_bait#22",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "sje_bait",
+   "UNIQUE not PK variant"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t0(c2 INT PRIMARY KEY, c3 INT)",
+   "INSERT INTO t0 VALUES (1,10),(2,20)"
+  ],
+  "query": "SELECT s.c3 FROM t0 INNER JOIN LATERAL (SELECT t0.c3 UNION ALL SELECT t0.c3) s ON (s.c3 IS NOT NULL) WHERE t0.c2 IN (SELECT c2 FROM t0) ORDER BY s.c3",
+  "source": "pg18_target:sje_bait#23",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "sje_bait",
+   "appendrel output in SELECT"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t0(c2 INT PRIMARY KEY, c3 INT)",
+   "CREATE TABLE u0(d2 INT PRIMARY KEY, d3 INT)",
+   "INSERT INTO t0 VALUES (1,10),(2,20)",
+   "INSERT INTO u0 VALUES (1,10),(3,30)"
+  ],
+  "query": "SELECT count(*) FROM t0 JOIN u0 ON t0.c2 = u0.d2 INNER JOIN LATERAL (SELECT t0.c3 UNION ALL SELECT u0.d3) s ON (s.c3 IS NOT NULL) WHERE t0.c2 IN (SELECT c2 FROM t0)",
+  "source": "pg18_target:sje_bait#24",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "sje_bait",
+   "appendrel over two rels"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE items (id text, owner text)",
+   "CREATE TABLE follows (item_id text, user_id text, UNIQUE (user_id, item_id))",
+   "INSERT INTO items VALUES ('item1', 'alice')"
+  ],
+  "query": "WITH viewer AS (SELECT 'bob' AS id) SELECT count(*) FROM items LEFT JOIN follows ON follows.item_id = items.id AND follows.user_id = 'bob' LEFT JOIN viewer ON TRUE WHERE items.owner = viewer.id",
+  "source": "pg18_target:jr_phv#25",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "jr_phv",
+   "#19560 verbatim shape"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE items (id text, owner text)",
+   "CREATE TABLE follows (item_id text, user_id text, UNIQUE (user_id, item_id))",
+   "INSERT INTO items VALUES ('item1', 'alice'),('item2','bob'),('item3',NULL)"
+  ],
+  "query": "WITH viewer AS (SELECT 'bob' AS id) SELECT id FROM items LEFT JOIN follows ON follows.item_id = items.id AND follows.user_id = 'bob' LEFT JOIN viewer ON TRUE WHERE items.owner = viewer.id ORDER BY id",
+  "source": "pg18_target:jr_phv#26",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "jr_phv",
+   "multi-row version"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE items (id text, owner text)",
+   "CREATE TABLE follows (item_id text, user_id text, UNIQUE (user_id, item_id))",
+   "INSERT INTO items VALUES ('item1', 'alice'),('item2','bob')"
+  ],
+  "query": "WITH viewer AS (SELECT 'bob' AS id UNION ALL SELECT 'carol') SELECT count(*) FROM items LEFT JOIN follows ON follows.item_id = items.id AND follows.user_id = 'bob' LEFT JOIN viewer ON TRUE WHERE items.owner = viewer.id",
+  "source": "pg18_target:jr_phv#27",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "jr_phv",
+   "two-row viewer (blocks pullup?)"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE items (id text, owner text)",
+   "CREATE TABLE follows (item_id text, user_id text, UNIQUE (user_id, item_id))",
+   "INSERT INTO items VALUES ('item1', 'alice')"
+  ],
+  "query": "SELECT count(*) FROM items LEFT JOIN follows ON follows.item_id = items.id AND follows.user_id = 'bob' LEFT JOIN (SELECT 'bob' AS id) viewer ON TRUE WHERE items.owner = viewer.id",
+  "source": "pg18_target:jr_phv#28",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "jr_phv",
+   "inline subquery form"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE items (id text, owner text)",
+   "CREATE TABLE follows (item_id text, user_id text, UNIQUE (user_id, item_id))",
+   "INSERT INTO items VALUES ('item1', 'alice')"
+  ],
+  "query": "WITH viewer AS (SELECT 'bob' AS id) SELECT count(*) FROM items LEFT JOIN viewer ON TRUE LEFT JOIN follows ON follows.item_id = items.id AND follows.user_id = 'bob' WHERE items.owner = viewer.id",
+  "source": "pg18_target:jr_phv#29",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "jr_phv",
+   "join order swapped"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE tenk1 AS SELECT g AS unique1, g%2 AS two, g%10 AS ten, g%20 AS twenty, g%100 AS hundred FROM generate_series(0,1999) g",
+   "CREATE INDEX tenk1_unique1 ON tenk1(unique1)",
+   "CREATE INDEX tenk1_hundred ON tenk1(hundred)",
+   "ANALYZE tenk1"
+  ],
+  "query": "SELECT sum(c) FROM (SELECT t0.unique1, (SELECT count(*) FROM tenk1 t2 JOIN tenk1 t1 ON t1.unique1 = t2.hundred + t0.ten WHERE t1.twenty = t0.ten) AS c FROM tenk1 t0 WHERE t0.unique1 < 100) s",
+  "source": "pg18_target:memoize_bait#30",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "memoize_bait",
+   "Brazeal expr-param shape (small)"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE tenk1 AS SELECT g AS unique1, g%2 AS two, g%10 AS ten, g%20 AS twenty, g%100 AS hundred FROM generate_series(0,1999) g",
+   "CREATE INDEX tenk1_unique1 ON tenk1(unique1)",
+   "CREATE INDEX tenk1_hundred ON tenk1(hundred)",
+   "ANALYZE tenk1"
+  ],
+  "query": "SELECT sum(c) FROM (SELECT t0.unique1, (SELECT count(*) FROM tenk1 t2 JOIN tenk1 t1 ON t1.unique1 = t2.hundred - t0.ten WHERE t1.twenty = t0.ten) AS c FROM tenk1 t0 WHERE t0.unique1 < 100) s",
+  "source": "pg18_target:memoize_bait#31",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "memoize_bait",
+   "expr-param minus variant"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE tenk1 AS SELECT g AS unique1, g%2 AS two, g%10 AS ten, g%20 AS twenty, g%100 AS hundred FROM generate_series(0,1999) g",
+   "CREATE INDEX tenk1_unique1 ON tenk1(unique1)",
+   "CREATE INDEX tenk1_hundred ON tenk1(hundred)",
+   "ANALYZE tenk1"
+  ],
+  "query": "SELECT sum(c) FROM (SELECT t0.unique1, (SELECT count(*) FROM tenk1 t2 JOIN tenk1 t1 ON t1.unique1 = t2.hundred + t0.ten WHERE t1.twenty = t0.twenty) AS c FROM tenk1 t0 WHERE t0.unique1 < 100) s",
+  "source": "pg18_target:memoize_bait#32",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "memoize_bait",
+   "param in qual differs"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE sk(a INT, b INT, v INT)",
+   "INSERT INTO sk SELECT g%3, g%50, g FROM generate_series(0,4999) g",
+   "CREATE INDEX sk_ab ON sk(a,b)",
+   "ANALYZE sk"
+  ],
+  "query": "SELECT count(*) FROM sk WHERE b = 7",
+  "source": "pg18_target:skipscan#33",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "skipscan",
+   "non-leading col qual (skip-scan bait)"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE sk(a INT, b INT, v INT)",
+   "INSERT INTO sk SELECT g%3, g%50, g FROM generate_series(0,4999) g",
+   "CREATE INDEX sk_ab ON sk(a,b)",
+   "ANALYZE sk"
+  ],
+  "query": "SELECT a, count(*) FROM sk WHERE b = 7 GROUP BY a ORDER BY a",
+  "source": "pg18_target:skipscan#34",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "skipscan",
+   "skip-scan + group"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(a INT, b INT, v INT)",
+   "INSERT INTO r1 VALUES (1,1,1),(1,2,2),(2,1,3),(2,2,4),(NULL,1,5)"
+  ],
+  "query": "SELECT DISTINCT b, a FROM r1 ORDER BY b, a",
+  "source": "pg18_target:reorder18#35",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "reorder18",
+   "distinct reorder candidate"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(a INT, b INT, v INT)",
+   "INSERT INTO r1 VALUES (1,1,1),(1,2,2),(2,1,3),(2,2,4),(NULL,1,5)"
+  ],
+  "query": "SELECT a, b, count(*) FROM r1 GROUP BY GROUPING SETS ((a),(a,b),()) ORDER BY a NULLS LAST, b NULLS LAST",
+  "source": "pg18_target:reorder18#36",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "reorder18",
+   "grouping sets + reorder"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE u1(id UUID, v INT)",
+   "INSERT INTO u1 SELECT uuidv7(), g FROM generate_series(1,5) g"
+  ],
+  "query": "SELECT count(*) FROM u1 WHERE id IS NOT NULL ORDER BY 1",
+  "source": "pg18_target:uuid7#37",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "uuid7",
+   "uuidv7 deterministic shape"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t (id int PRIMARY KEY, a int, gen int GENERATED ALWAYS AS (a * 2) VIRTUAL)",
+   "CREATE TABLE t_log (op text, old_gen int, new_gen int)",
+   "CREATE RULE t_log AS ON UPDATE TO t DO ALSO INSERT INTO t_log VALUES ('UPD', OLD.gen, NEW.gen)",
+   "INSERT INTO t (id, a) VALUES (1, 5)",
+   "UPDATE t SET a = 100 WHERE id = 1"
+  ],
+  "query": "SELECT op, old_gen, new_gen FROM t_log ORDER BY op",
+  "source": "pg18_target:rule_gencol#38",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "rule_gencol",
+   "RULE NEW.gen (c6a79be area)"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t (id int PRIMARY KEY, a int, gen int GENERATED ALWAYS AS (a * 2) VIRTUAL)",
+   "CREATE TABLE t_log (op text, new_gen int)",
+   "CREATE RULE t_log AS ON INSERT TO t DO ALSO INSERT INTO t_log VALUES ('INS', NEW.gen)",
+   "INSERT INTO t (id, a) VALUES (1, 5),(2,7)"
+  ],
+  "query": "SELECT op, new_gen FROM t_log ORDER BY new_gen",
+  "source": "pg18_target:rule_gencol#39",
+  "engine": "postgres",
+  "tags": [
+   "pg18",
+   "rule_gencol",
+   "RULE NEW.gen on INSERT"
+  ]
+ }
+]

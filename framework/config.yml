@@ -1,0 +1,45 @@
+agents:
+  bug_hunter:
+    model: "deepseek-chat"
+    api_key: "${DEEPSEEK_API_KEY}"
+    base_url: "https://api.deepseek.com/v1"
+    exploration_strategy: "verified_guidance"
+  bug_fixer:
+    model: "deepseek-chat"
+    api_key: "${DEEPSEEK_API_KEY}"
+    base_url: "https://api.deepseek.com/v1"
+
+evolution:
+  max_iterations: 8
+  queries_per_iter: 8
+  batch_size: 5
+  stagnation_limit: 3
+  oracle_repetitions: 2
+  results_dir: "results"
+
+# L0 deterministic diagnosis (sigma signatures) + DCE family expansion.
+# Cost ladder: switch-level bisection is seconds; each confirmed family then
+# triggers a bounded neighborhood sweep on the fault surface.
+diagnosis:
+  enabled: true
+  max_bisect_executions: 120   # cap on intervention-basis bisection per bug
+  max_probes: 250              # neighborhood size generated per family
+  max_probes_executed: 150     # probes actually screened per family
+  dce_budget: 2000             # total probe+triage executions per run
+
+artifacts:
+  bug_archive: "artifacts/bugs.jsonl"
+
+database:
+  engine: "duckdb"
+  version: "1.5.2"
+  old_venv: "/home/user/work/db_safety/venv_duckdb_old"
+
+# Opt-in only. A clean DBMS source checkout and project-specific validation
+# commands are required before a coding-agent result can count as a repair.
+repair:
+  enabled: false
+  repository: ""
+  agent_command: []
+  reproducer_command: []
+  regression_command: []

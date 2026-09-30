@@ -1,0 +1,6283 @@
+[
+ {
+  "setup_sqls": [
+   "CREATE TABLE a1(id INT, arr INT[])",
+   "INSERT INTO a1 VALUES (1,'{1,2,3}'),(2,'{2,3}'),(3,'{}'),(4,NULL),(5,'{1,1,1}')"
+  ],
+  "query": "SELECT id, array_length(arr,1) FROM a1 ORDER BY id",
+  "source": "pg_target:array#0",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "array",
+   "array_length incl NULL/empty"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE a1(id INT, arr INT[])",
+   "INSERT INTO a1 VALUES (1,'{1,2,3}'),(2,'{2,3}'),(3,'{}'),(4,NULL)"
+  ],
+  "query": "SELECT id, u FROM a1, LATERAL unnest(arr) u ORDER BY id, u",
+  "source": "pg_target:array#1",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "array",
+   "unnest lateral"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE a1(id INT, arr INT[])",
+   "INSERT INTO a1 VALUES (1,'{1,2,3}'),(2,'{2,3}'),(3,'{}'),(4,NULL)"
+  ],
+  "query": "SELECT id FROM a1 WHERE arr @> '{2}' ORDER BY id",
+  "source": "pg_target:array#2",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "array",
+   "array contains"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE a1(id INT, arr INT[])",
+   "INSERT INTO a1 VALUES (1,'{1,2,3}'),(2,'{2,3}'),(3,'{}'),(4,NULL)"
+  ],
+  "query": "SELECT id FROM a1 WHERE arr && '{3,9}' ORDER BY id",
+  "source": "pg_target:array#3",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "array",
+   "array overlap"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE a1(id INT, arr INT[])",
+   "INSERT INTO a1 VALUES (1,'{1,2,3}'),(2,'{2,3}'),(3,NULL)"
+  ],
+  "query": "SELECT id, arr[1], arr[0], arr[4], arr[-1] FROM a1 ORDER BY id",
+  "source": "pg_target:array#4",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "array",
+   "array index edge"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE a1(id INT, arr INT[])",
+   "INSERT INTO a1 VALUES (1,'{1,2,3,4}'),(2,'{9,8,7,6}'),(3,NULL)"
+  ],
+  "query": "SELECT id, arr[2:3], arr[:2], arr[3:] FROM a1 ORDER BY id",
+  "source": "pg_target:array#5",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "array",
+   "array slices"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE a1(id INT, v INT)",
+   "INSERT INTO a1 VALUES (1,5),(1,3),(2,7),(2,7),(3,NULL)"
+  ],
+  "query": "SELECT id, array_agg(v ORDER BY v DESC NULLS LAST) FROM a1 GROUP BY id ORDER BY id",
+  "source": "pg_target:array#6",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "array",
+   "array_agg ordered"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE a1(id INT, v INT)",
+   "INSERT INTO a1 VALUES (1,5),(1,3),(2,7),(3,NULL)"
+  ],
+  "query": "SELECT id, v, array_agg(v) OVER (PARTITION BY id ORDER BY v ROWS UNBOUNDED PRECEDING) FROM a1 ORDER BY id, v NULLS LAST",
+  "source": "pg_target:array#7",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "array",
+   "window array_agg"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE a1(id INT, arr INT[])",
+   "INSERT INTO a1 VALUES (1,'{1,2,NULL}'),(2,'{NULL,NULL}'),(3,'{}')"
+  ],
+  "query": "SELECT id, array_position(arr, NULL), cardinality(arr) FROM a1 ORDER BY id",
+  "source": "pg_target:array#8",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "array",
+   "array NULL elems"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE a1(id INT, arr TEXT[])",
+   "INSERT INTO a1 VALUES (1,'{a,b}'),(2,'{A,b}'),(3,'{a,a}')"
+  ],
+  "query": "SELECT id, array_to_string(arr,',') FROM a1 ORDER BY id",
+  "source": "pg_target:array#9",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "array",
+   "array_to_string"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE a1(id INT, arr INT[][])",
+   "INSERT INTO a1 VALUES (1,'{{1,2},{3,4}}'),(2,'{{5,6}}'),(3,NULL)"
+  ],
+  "query": "SELECT id, arr[1][2], array_dims(arr) FROM a1 ORDER BY id",
+  "source": "pg_target:array#10",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "array",
+   "multidim array"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE a1(id INT, v INT)",
+   "INSERT INTO a1 VALUES (1,1),(1,2),(2,3)"
+  ],
+  "query": "SELECT id FROM a1 GROUP BY id HAVING 2 = ANY(array_agg(v)) ORDER BY id",
+  "source": "pg_target:array#11",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "array",
+   "HAVING ANY array_agg"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, v INT)",
+   "INSERT INTO t1 VALUES (1,10),(2,20),(3,30)",
+   "CREATE TABLE t2(k INT, w INT)",
+   "INSERT INTO t2 VALUES (1,1),(1,2),(2,3)"
+  ],
+  "query": "SELECT t1.id, s.w FROM t1, LATERAL (SELECT w FROM t2 WHERE t2.k=t1.id ORDER BY w LIMIT 2) s ORDER BY t1.id, s.w",
+  "source": "pg_target:lateral#12",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "lateral",
+   "lateral limit"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, v INT)",
+   "INSERT INTO t1 VALUES (1,10),(2,20),(3,30)",
+   "CREATE TABLE t2(k INT, w INT)",
+   "INSERT INTO t2 VALUES (1,1),(2,3)"
+  ],
+  "query": "SELECT t1.id, s.w FROM t1 LEFT JOIN LATERAL (SELECT w FROM t2 WHERE t2.k=t1.id) s ON true ORDER BY t1.id, s.w",
+  "source": "pg_target:lateral#13",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "lateral",
+   "lateral left join unmatched"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT)",
+   "INSERT INTO t1 VALUES (1),(2),(3)"
+  ],
+  "query": "SELECT t1.id, g.x FROM t1 CROSS JOIN LATERAL (SELECT t1.id*10 AS x) g ORDER BY t1.id",
+  "source": "pg_target:lateral#14",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "lateral",
+   "lateral scalar ref"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT)",
+   "INSERT INTO t1 VALUES (2),(3)"
+  ],
+  "query": "SELECT t1.id, s.i FROM t1, LATERAL generate_series(1,t1.id) s(i) ORDER BY t1.id, s.i",
+  "source": "pg_target:lateral#15",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "lateral",
+   "lateral SRF"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, v INT)",
+   "INSERT INTO t1 VALUES (1,10),(2,20)",
+   "CREATE TABLE t2(k INT, w INT)",
+   "INSERT INTO t2 VALUES (1,5),(1,15),(2,25)"
+  ],
+  "query": "SELECT t1.id, s.agg FROM t1 LEFT JOIN LATERAL (SELECT sum(w) AS agg FROM t2 WHERE t2.k=t1.id) s ON true ORDER BY t1.id",
+  "source": "pg_target:lateral#16",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "lateral",
+   "lateral aggregate"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT)",
+   "INSERT INTO t1 VALUES (1),(2)"
+  ],
+  "query": "SELECT t1.id, s.x FROM t1, LATERAL (SELECT x FROM (VALUES (t1.id+1),(t1.id+2)) v(x)) s ORDER BY t1.id, s.x",
+  "source": "pg_target:lateral#17",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "lateral",
+   "lateral VALUES"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE d1(a INT, b INT, c INT)",
+   "INSERT INTO d1 VALUES (1,9,1),(1,5,2),(1,7,3),(2,1,4),(2,8,5)"
+  ],
+  "query": "SELECT DISTINCT ON (a) a, b, c FROM d1 ORDER BY a, b",
+  "source": "pg_target:distinct_on#18",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "distinct_on",
+   "distinct on asc"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE d1(a INT, b INT)",
+   "INSERT INTO d1 VALUES (1,9),(1,5),(2,1),(2,8),(3,NULL)"
+  ],
+  "query": "SELECT DISTINCT ON (a) a, b FROM d1 ORDER BY a, b DESC NULLS LAST",
+  "source": "pg_target:distinct_on#19",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "distinct_on",
+   "distinct on desc nulls"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE d1(a INT, b TEXT)",
+   "INSERT INTO d1 VALUES (1,'x'),(1,'y'),(1,'x'),(2,'z')"
+  ],
+  "query": "SELECT DISTINCT ON (a,b) a, b FROM d1 ORDER BY a, b",
+  "source": "pg_target:distinct_on#20",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "distinct_on",
+   "distinct on multikey"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":1,\"b\":[1,2]}'),(2,'{\"a\":2}'),(3,'{}'),(4,NULL)"
+  ],
+  "query": "SELECT id, j->>'a', j->'b' FROM j1 ORDER BY id",
+  "source": "pg_target:jsonb#21",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "jsonb",
+   "jsonb extract"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":{\"x\":5}}'),(2,'{\"a\":{\"x\":6}}'),(3,'{}')"
+  ],
+  "query": "SELECT id, j#>>'{a,x}' FROM j1 ORDER BY id",
+  "source": "pg_target:jsonb#22",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "jsonb",
+   "jsonb path text"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":1}'),(2,'{\"a\":2,\"b\":3}'),(3,'{}')"
+  ],
+  "query": "SELECT id FROM j1 WHERE j @> '{\"a\":1}' ORDER BY id",
+  "source": "pg_target:jsonb#23",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "jsonb",
+   "jsonb contains"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'[1,2,3]'),(2,'[2,3]'),(3,'[]')"
+  ],
+  "query": "SELECT id, e FROM j1, LATERAL jsonb_array_elements(j) e ORDER BY id, e",
+  "source": "pg_target:jsonb#24",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "jsonb",
+   "jsonb array elements"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":1}'),(2,'{\"a\":2}')"
+  ],
+  "query": "SELECT id, j ? 'a', j ? 'zzz' FROM j1 ORDER BY id",
+  "source": "pg_target:jsonb#25",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "jsonb",
+   "jsonb key exists"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, v INT)",
+   "INSERT INTO j1 VALUES (1,5),(1,3),(2,7)"
+  ],
+  "query": "SELECT id, jsonb_agg(jsonb_build_object('v',v) ORDER BY v) FROM j1 GROUP BY id ORDER BY id",
+  "source": "pg_target:jsonb#26",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "jsonb",
+   "jsonb_agg ordered"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":1}'),(2,'{\"a\":2,\"b\":{}}')"
+  ],
+  "query": "SELECT id, j - 'a', j || '{\"z\":9}' FROM j1 ORDER BY id",
+  "source": "pg_target:jsonb#27",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "jsonb",
+   "jsonb delete/concat"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE c1(a INT, b INT)",
+   "INSERT INTO c1 VALUES (1,10),(1,20),(2,30),(2,40)"
+  ],
+  "query": "WITH s AS MATERIALIZED (SELECT a, sum(b) t FROM c1 GROUP BY a) SELECT s1.a, s1.t, s2.t FROM s s1 JOIN s s2 ON s1.a=s2.a ORDER BY s1.a",
+  "source": "pg_target:cte_mat#28",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "cte_mat",
+   "materialized self-join"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE c1(a INT, b INT)",
+   "INSERT INTO c1 VALUES (1,10),(2,30)"
+  ],
+  "query": "WITH s AS NOT MATERIALIZED (SELECT a, b FROM c1) SELECT * FROM s s1 JOIN s s2 ON s1.a=s2.a AND s1.b<s2.b ORDER BY s1.a",
+  "source": "pg_target:cte_mat#29",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "cte_mat",
+   "not materialized self-join"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE c1(a INT)",
+   "INSERT INTO c1 VALUES (1),(2),(3)"
+  ],
+  "query": "WITH s AS MATERIALIZED (SELECT a, a*2 d FROM c1) SELECT a, d FROM s WHERE d IN (SELECT d FROM s) ORDER BY a",
+  "source": "pg_target:cte_mat#30",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "cte_mat",
+   "materialized in-subq"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE c1(a INT, b INT)",
+   "INSERT INTO c1 VALUES (1,10),(1,20),(2,30)"
+  ],
+  "query": "WITH s AS (SELECT a, sum(b) t FROM c1 GROUP BY a) SELECT a FROM c1 WHERE a IN (SELECT a FROM s WHERE t>15) ORDER BY a",
+  "source": "pg_target:cte_mat#31",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "cte_mat",
+   "cte in subquery"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, parent INT)",
+   "INSERT INTO r1 VALUES (1,NULL),(2,1),(3,1),(4,2),(5,4)"
+  ],
+  "query": "WITH RECURSIVE tr AS (SELECT id, parent, 0 d FROM r1 WHERE parent IS NULL UNION ALL SELECT r.id, r.parent, t.d+1 FROM r1 r JOIN tr t ON r.parent=t.id) SELECT id, d FROM tr ORDER BY id",
+  "source": "pg_target:recursive#32",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "recursive",
+   "tree walk"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, parent INT)",
+   "INSERT INTO r1 VALUES (1,NULL),(2,1),(3,2),(4,3)"
+  ],
+  "query": "WITH RECURSIVE tr AS (SELECT id, 0 d FROM r1 WHERE id=1 UNION ALL SELECT r.id, t.d+1 FROM r1 r JOIN tr t ON r.parent=t.id) SELECT max(d) FROM tr",
+  "source": "pg_target:recursive#33",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "recursive",
+   "chain depth"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "WITH RECURSIVE s(i) AS (SELECT 1 UNION ALL SELECT i+1 FROM s WHERE i<10) SELECT sum(i), count(*) FROM s",
+  "source": "pg_target:recursive#34",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "recursive",
+   "series gen"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE p1(a INT, b INT) PARTITION BY RANGE (a)",
+   "CREATE TABLE p1_0 PARTITION OF p1 FOR VALUES FROM (0) TO (50)",
+   "CREATE TABLE p1_1 PARTITION OF p1 FOR VALUES FROM (50) TO (100)",
+   "INSERT INTO p1 VALUES (10,1),(20,2),(60,3),(70,4),(30,5)"
+  ],
+  "query": "SELECT a, sum(b) FROM p1 GROUP BY a ORDER BY a",
+  "source": "pg_target:partition#35",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "partition",
+   "range partition agg"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE p1(a INT, b INT) PARTITION BY LIST (a)",
+   "CREATE TABLE p1_a PARTITION OF p1 FOR VALUES IN (1,2)",
+   "CREATE TABLE p1_b PARTITION OF p1 FOR VALUES IN (3,4)",
+   "INSERT INTO p1 VALUES (1,10),(2,20),(3,30),(4,40)"
+  ],
+  "query": "SELECT * FROM p1 WHERE a IN (1,3) ORDER BY a",
+  "source": "pg_target:partition#36",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "partition",
+   "list partition prune"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE p1(a INT, b INT) PARTITION BY HASH (a)",
+   "CREATE TABLE p1_0 PARTITION OF p1 FOR VALUES WITH (MODULUS 2, REMAINDER 0)",
+   "CREATE TABLE p1_1 PARTITION OF p1 FOR VALUES WITH (MODULUS 2, REMAINDER 1)",
+   "INSERT INTO p1 VALUES (1,10),(2,20),(3,30),(4,40)"
+  ],
+  "query": "SELECT a, b FROM p1 ORDER BY a",
+  "source": "pg_target:partition#37",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "partition",
+   "hash partition scan"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE p1(a INT, b INT) PARTITION BY RANGE (a)",
+   "CREATE TABLE p1_0 PARTITION OF p1 FOR VALUES FROM (0) TO (50)",
+   "CREATE TABLE p1_1 PARTITION OF p1 FOR VALUES FROM (50) TO (100)",
+   "INSERT INTO p1 VALUES (10,1),(20,2),(60,3)",
+   "CREATE TABLE q1(a INT, c INT)",
+   "INSERT INTO q1 VALUES (10,100),(60,300)"
+  ],
+  "query": "SELECT p1.a, p1.b, q1.c FROM p1 JOIN q1 ON p1.a=q1.a ORDER BY p1.a",
+  "source": "pg_target:partition#38",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "partition",
+   "partition join"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE p1(a INT, b INT) PARTITION BY RANGE (a)",
+   "CREATE TABLE p1_0 PARTITION OF p1 FOR VALUES FROM (0) TO (50)",
+   "CREATE TABLE p1_1 PARTITION OF p1 FOR VALUES FROM (50) TO (100)",
+   "INSERT INTO p1 VALUES (10,1),(20,2),(60,3)"
+  ],
+  "query": "SELECT count(*) FROM p1 WHERE a >= 50",
+  "source": "pg_target:partition#39",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "partition",
+   "partition count"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE p1(a INT, b INT) PARTITION BY RANGE (a)",
+   "CREATE TABLE p1_0 PARTITION OF p1 FOR VALUES FROM (0) TO (50)",
+   "CREATE TABLE p1_1 PARTITION OF p1 FOR VALUES FROM (50) TO (100)",
+   "INSERT INTO p1 VALUES (10,1),(20,2),(60,3)",
+   "CREATE INDEX pi ON p1(b)"
+  ],
+  "query": "SELECT a, b FROM p1 WHERE b >= 2 ORDER BY a",
+  "source": "pg_target:partition#40",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "partition",
+   "partitioned index"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT, b INT GENERATED ALWAYS AS (a*2) STORED)",
+   "INSERT INTO g1(a) VALUES (1),(2),(NULL)"
+  ],
+  "query": "SELECT a, b FROM g1 ORDER BY a NULLS LAST",
+  "source": "pg_target:gen_col#41",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "gen_col",
+   "generated basic"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT, b INT GENERATED ALWAYS AS (a*2) STORED)",
+   "INSERT INTO g1(a) VALUES (1),(2),(3)",
+   "CREATE INDEX gi ON g1(b)"
+  ],
+  "query": "SELECT a FROM g1 WHERE b = 4 ORDER BY a",
+  "source": "pg_target:gen_col#42",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "gen_col",
+   "generated index lookup"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT, b INT GENERATED ALWAYS AS (a*2) STORED)",
+   "INSERT INTO g1(a) VALUES (1),(2),(3)"
+  ],
+  "query": "SELECT sum(b), max(b) FROM g1 GROUP BY a ORDER BY a",
+  "source": "pg_target:gen_col#43",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "gen_col",
+   "generated agg"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE w1(g INT, v INT)",
+   "INSERT INTO w1 VALUES (1,10),(1,20),(1,30),(2,5),(2,15)"
+  ],
+  "query": "SELECT g, v, sum(v) OVER (PARTITION BY g ORDER BY v ROWS UNBOUNDED PRECEDING EXCLUDE CURRENT ROW) FROM w1 ORDER BY g, v",
+  "source": "pg_target:window#44",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "window",
+   "EXCLUDE CURRENT ROW"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE w1(g INT, v INT)",
+   "INSERT INTO w1 VALUES (1,10),(1,10),(1,20),(2,5)"
+  ],
+  "query": "SELECT g, v, sum(v) OVER (PARTITION BY g ORDER BY v GROUPS BETWEEN 1 PRECEDING AND 1 FOLLOWING EXCLUDE TIES) FROM w1 ORDER BY g, v",
+  "source": "pg_target:window#45",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "window",
+   "GROUPS + EXCLUDE TIES"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE w1(g INT, v INT)",
+   "INSERT INTO w1 VALUES (1,10),(1,20),(2,5),(2,15)"
+  ],
+  "query": "SELECT g, v, avg(v) FILTER (WHERE v>10) OVER (PARTITION BY g) FROM w1 ORDER BY g, v",
+  "source": "pg_target:window#46",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "window",
+   "window FILTER"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE w1(g INT, v INT)",
+   "INSERT INTO w1 VALUES (1,10),(1,20),(2,5)"
+  ],
+  "query": "SELECT g, v, sum(v) OVER w1, count(*) OVER w2 FROM w1 WINDOW w1 AS (PARTITION BY g), w2 AS (ORDER BY v) ORDER BY g, v",
+  "source": "pg_target:window#47",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "window",
+   "named windows"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE w1(g INT, v INT)",
+   "INSERT INTO w1 VALUES (1,10),(1,10),(1,20),(2,5),(2,5)"
+  ],
+  "query": "SELECT g, v, sum(v) OVER (PARTITION BY g ORDER BY v RANGE BETWEEN 5 PRECEDING AND 5 FOLLOWING EXCLUDE GROUP) FROM w1 ORDER BY g, v",
+  "source": "pg_target:window#48",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "window",
+   "RANGE + EXCLUDE GROUP"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE w1(v INT)",
+   "INSERT INTO w1 VALUES (10),(20),(30),(40)"
+  ],
+  "query": "SELECT v, ntile(2) OVER (ORDER BY v ROWS BETWEEN 1 FOLLOWING AND 1 FOLLOWING) FROM w1 ORDER BY v",
+  "source": "pg_target:window#49",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "window",
+   "ntile empty tail frame"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE w1(v INT)",
+   "INSERT INTO w1 VALUES (10),(20),(30)"
+  ],
+  "query": "SELECT v, lead(v) OVER (ORDER BY v ROWS BETWEEN 2 FOLLOWING AND 1 FOLLOWING) FROM w1 ORDER BY v",
+  "source": "pg_target:window#50",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "window",
+   "lead inverted frame"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE n1(a NUMERIC(10,3), b NUMERIC(10,3))",
+   "INSERT INTO n1 VALUES (1.005, 2.675),(0.1, 0.2),(99999.999, 0.001)"
+  ],
+  "query": "SELECT a, b, a+b, a*b, round(a,2), round(b,2) FROM n1 ORDER BY a",
+  "source": "pg_target:numeric#51",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "numeric",
+   "numeric rounding"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE n1(a NUMERIC(20,10), b INT)",
+   "INSERT INTO n1 VALUES (1.0000000001,3),(2.5,0)"
+  ],
+  "query": "SELECT a, a/NULLIF(b,0), b=0, CASE WHEN b<>0 THEN a/b END FROM n1 ORDER BY a",
+  "source": "pg_target:numeric#52",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "numeric",
+   "numeric div by zero guard"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE n1(a BIGINT)",
+   "INSERT INTO n1 VALUES (9223372036854775806),(2),(-9223372036854775807)"
+  ],
+  "query": "SELECT a, a+1, a-1, -a FROM n1 WHERE a < 9223372036854775806 AND a > -9223372036854775807 ORDER BY a",
+  "source": "pg_target:numeric#53",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "numeric",
+   "bigint bounds"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE n1(a DOUBLE PRECISION)",
+   "INSERT INTO n1 VALUES ('NaN'),('Infinity'),('-Infinity'),(1.5),(0.0)"
+  ],
+  "query": "SELECT a FROM n1 ORDER BY a",
+  "source": "pg_target:numeric#54",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "numeric",
+   "float specials order"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE n1(a DOUBLE PRECISION)",
+   "INSERT INTO n1 VALUES ('NaN'),(1.5),(2.5)"
+  ],
+  "query": "SELECT max(a), min(a), sum(a), avg(a) FROM n1",
+  "source": "pg_target:numeric#55",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "numeric",
+   "NaN aggregates"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE n1(a DOUBLE PRECISION)",
+   "INSERT INTO n1 VALUES (0.1),(0.2),(0.3)"
+  ],
+  "query": "SELECT a, a+a+a = 0.3 AS eq3, sum(a) OVER () FROM n1 ORDER BY a",
+  "source": "pg_target:numeric#56",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "numeric",
+   "float assoc"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE i1(d DATE)",
+   "INSERT INTO i1 VALUES ('2024-01-31'),('2024-03-01'),('2023-02-28')"
+  ],
+  "query": "SELECT d, d + INTERVAL '1 month' a, d + INTERVAL '30 days' b FROM i1 ORDER BY d",
+  "source": "pg_target:interval#57",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "interval",
+   "month vs days"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE i1(d DATE)",
+   "INSERT INTO i1 VALUES ('2024-01-31'),('2024-02-29')"
+  ],
+  "query": "SELECT d, (d + INTERVAL '1 month') = (d + INTERVAL '30 days') eq FROM i1 ORDER BY d",
+  "source": "pg_target:interval#58",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "interval",
+   "interval eq congruence"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE i1(t TIMESTAMP)",
+   "INSERT INTO i1 VALUES ('2024-03-10 02:30:00'),('2024-11-03 01:30:00')"
+  ],
+  "query": "SELECT t, t + INTERVAL '1 day', t + INTERVAL '24 hours' FROM i1 ORDER BY t",
+  "source": "pg_target:interval#59",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "interval",
+   "dst edge (utc embed)"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE i1(a INTERVAL)",
+   "INSERT INTO i1 VALUES ('1 month'),('30 days'),('1 year'),('365 days')"
+  ],
+  "query": "SELECT a, a = INTERVAL '30 days' eq30, a = INTERVAL '1 month' eqm FROM i1 ORDER BY a",
+  "source": "pg_target:interval#60",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "interval",
+   "interval equality"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE i1(d DATE)",
+   "INSERT INTO i1 VALUES ('2024-02-29'),('2023-02-28')"
+  ],
+  "query": "SELECT d, d + INTERVAL '1 year', d - INTERVAL '1 year' FROM i1 ORDER BY d",
+  "source": "pg_target:interval#61",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "interval",
+   "leap year"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT)",
+   "INSERT INTO s1 VALUES (1),(2),(2),(3)",
+   "CREATE TABLE s2(a INT)",
+   "INSERT INTO s2 VALUES (2),(2),(4)"
+  ],
+  "query": "SELECT a FROM s1 UNION ALL SELECT a FROM s2 ORDER BY a",
+  "source": "pg_target:setop#62",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "setop",
+   "union all"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT)",
+   "INSERT INTO s1 VALUES (1),(2),(2),(3)",
+   "CREATE TABLE s2(a INT)",
+   "INSERT INTO s2 VALUES (2),(2),(4)"
+  ],
+  "query": "SELECT a FROM s1 INTERSECT ALL SELECT a FROM s2 ORDER BY a",
+  "source": "pg_target:setop#63",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "setop",
+   "intersect all"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT)",
+   "INSERT INTO s1 VALUES (1),(2),(2),(3)",
+   "CREATE TABLE s2(a INT)",
+   "INSERT INTO s2 VALUES (2),(2),(4)"
+  ],
+  "query": "SELECT a FROM s1 EXCEPT ALL SELECT a FROM s2 ORDER BY a",
+  "source": "pg_target:setop#64",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "setop",
+   "except all"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT)",
+   "INSERT INTO s1 VALUES (1),(2),(NULL)",
+   "CREATE TABLE s2(a INT)",
+   "INSERT INTO s2 VALUES (2),(NULL)"
+  ],
+  "query": "SELECT a FROM s1 UNION SELECT a FROM s2 ORDER BY a NULLS LAST",
+  "source": "pg_target:setop#65",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "setop",
+   "union nulls"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT, b INT)",
+   "INSERT INTO s1 VALUES (1,1),(1,2),(2,1)",
+   "CREATE TABLE s2(a INT)",
+   "INSERT INTO s2 VALUES (1),(2)"
+  ],
+  "query": "(SELECT a, b FROM s1) INTERSECT (SELECT a, a FROM s2) ORDER BY 1,2",
+  "source": "pg_target:setop#66",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "setop",
+   "intersect arity"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(s TEXT)",
+   "INSERT INTO t1 VALUES ('abc'),('a_c'),('a%c'),('ABC'),('a\\c')"
+  ],
+  "query": "SELECT s FROM t1 WHERE s LIKE 'a\\_c' ESCAPE '\\' ORDER BY s",
+  "source": "pg_target:string#67",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "string",
+   "like escape"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(s TEXT)",
+   "INSERT INTO t1 VALUES ('abc'),('axc'),('a.c'),('ABC')"
+  ],
+  "query": "SELECT s FROM t1 WHERE s ~ '^a.c$' ORDER BY s",
+  "source": "pg_target:string#68",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "string",
+   "regex match"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(s TEXT)",
+   "INSERT INTO t1 VALUES ('abc'),('axc'),('ABC'),('xyz')"
+  ],
+  "query": "SELECT s, regexp_replace(s,'[bx]','_','g') FROM t1 ORDER BY s",
+  "source": "pg_target:string#69",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "string",
+   "regexp_replace"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(s TEXT)",
+   "INSERT INTO t1 VALUES ('abc'),('a%bc'),('a\\bc')"
+  ],
+  "query": "SELECT s FROM t1 WHERE s LIKE 'a!%b%' ESCAPE '!' ORDER BY s",
+  "source": "pg_target:string#70",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "string",
+   "like escape bang"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(s TEXT)",
+   "INSERT INTO t1 VALUES ('a1b2'),('x9y'),('nodigits')"
+  ],
+  "query": "SELECT s, substring(s from '[0-9]+') FROM t1 ORDER BY s",
+  "source": "pg_target:string#71",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "string",
+   "substring regex"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(s TEXT COLLATE \"C\")",
+   "INSERT INTO t1 VALUES ('a'),('B'),('A'),('b'),('1')"
+  ],
+  "query": "SELECT s FROM t1 ORDER BY s",
+  "source": "pg_target:string#72",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "string",
+   "C collation order"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT, b INT, v INT)",
+   "INSERT INTO g1 VALUES (1,1,10),(1,2,20),(2,1,30)"
+  ],
+  "query": "SELECT a, b, sum(v), grouping(a,b) FROM g1 GROUP BY GROUPING SETS ((a,b),(a),()) ORDER BY 1 NULLS LAST, 2 NULLS LAST",
+  "source": "pg_target:grouping#73",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "grouping",
+   "grouping sets"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT, b INT, v INT)",
+   "INSERT INTO g1 VALUES (1,1,10),(1,2,20),(2,1,30),(2,NULL,5)"
+  ],
+  "query": "SELECT a, b, sum(v) FROM g1 GROUP BY ROLLUP (a,b) ORDER BY 1 NULLS LAST, 2 NULLS LAST",
+  "source": "pg_target:grouping#74",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "grouping",
+   "rollup"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT, b INT, v INT)",
+   "INSERT INTO g1 VALUES (1,1,10),(1,2,20),(2,1,30)"
+  ],
+  "query": "SELECT a, b, count(*) FROM g1 GROUP BY CUBE (a,b) ORDER BY 1 NULLS LAST, 2 NULLS LAST",
+  "source": "pg_target:grouping#75",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "grouping",
+   "cube"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT, v INT)",
+   "INSERT INTO g1 VALUES (1,10),(1,20),(2,30)"
+  ],
+  "query": "SELECT a, sum(v) FROM g1 GROUP BY a HAVING sum(v) > 15 UNION ALL SELECT NULL, sum(v) FROM g1 ORDER BY 1 NULLS LAST",
+  "source": "pg_target:grouping#76",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "grouping",
+   "having + union"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(a INT, b INT)",
+   "INSERT INTO t1 VALUES (1,10),(2,20),(3,30)",
+   "CREATE TABLE t2(k INT)",
+   "INSERT INTO t2 VALUES (1),(3),(NULL)"
+  ],
+  "query": "SELECT a FROM t1 WHERE a IN (SELECT k FROM t2) ORDER BY a",
+  "source": "pg_target:subquery#77",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "subquery",
+   "IN with null"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(a INT, b INT)",
+   "INSERT INTO t1 VALUES (1,10),(2,20),(3,30)",
+   "CREATE TABLE t2(k INT)",
+   "INSERT INTO t2 VALUES (1),(3),(NULL)"
+  ],
+  "query": "SELECT a FROM t1 WHERE a NOT IN (SELECT k FROM t2) ORDER BY a",
+  "source": "pg_target:subquery#78",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "subquery",
+   "NOT IN null trap"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(a INT)",
+   "INSERT INTO t1 VALUES (1),(2),(3)",
+   "CREATE TABLE t2(k INT)",
+   "INSERT INTO t2 VALUES (1),(2)"
+  ],
+  "query": "SELECT a FROM t1 WHERE EXISTS (SELECT 1 FROM t2 WHERE t2.k=t1.a) ORDER BY a",
+  "source": "pg_target:subquery#79",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "subquery",
+   "correlated exists"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(a INT)",
+   "INSERT INTO t1 VALUES (1),(2)",
+   "CREATE TABLE t2(k INT)",
+   "INSERT INTO t2 VALUES (1)"
+  ],
+  "query": "SELECT a, (SELECT count(*) FROM t2 WHERE t2.k=t1.a) FROM t1 ORDER BY a",
+  "source": "pg_target:subquery#80",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "subquery",
+   "scalar correlated"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(a INT, b INT)",
+   "INSERT INTO t1 VALUES (1,5),(2,15)",
+   "CREATE TABLE t2(k INT, w INT)",
+   "INSERT INTO t2 VALUES (1,1),(1,9),(2,20)"
+  ],
+  "query": "SELECT a FROM t1 WHERE b > ALL (SELECT w FROM t2 WHERE t2.k=t1.a) ORDER BY a",
+  "source": "pg_target:subquery#81",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "subquery",
+   "ALL correlated"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(a INT)",
+   "INSERT INTO t1 VALUES (1),(2),(3)"
+  ],
+  "query": "SELECT a FROM t1 WHERE a = ANY (SELECT a FROM t1 WHERE a<3) ORDER BY a",
+  "source": "pg_target:subquery#82",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "subquery",
+   "ANY self"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(a INT)",
+   "INSERT INTO j1 VALUES (1),(2),(3)",
+   "CREATE TABLE j2(a INT)",
+   "INSERT INTO j2 VALUES (1),(2)",
+   "CREATE TABLE j3(a INT)",
+   "INSERT INTO j3 VALUES (1)",
+   "CREATE TABLE j4(a INT)",
+   "INSERT INTO j4 VALUES (1),(4)",
+   "CREATE TABLE j5(a INT)",
+   "INSERT INTO j5 VALUES (1)"
+  ],
+  "query": "SELECT count(*) FROM j1 JOIN j2 ON j1.a=j2.a JOIN j3 ON j2.a=j3.a JOIN j4 ON j3.a=j4.a JOIN j5 ON j4.a=j5.a",
+  "source": "pg_target:joins#83",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "joins",
+   "5-way join geqo edge"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(a INT, b INT)",
+   "INSERT INTO j1 VALUES (1,1),(2,2)",
+   "CREATE TABLE j2(a INT)",
+   "INSERT INTO j2 VALUES (1),(2),(3)"
+  ],
+  "query": "SELECT j1.a, j2.a FROM j1 FULL JOIN j2 ON j1.a=j2.a ORDER BY 1 NULLS LAST, 2 NULLS LAST",
+  "source": "pg_target:joins#84",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "joins",
+   "full join"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(a INT)",
+   "INSERT INTO j1 VALUES (1),(2),(NULL)",
+   "CREATE TABLE j2(a INT)",
+   "INSERT INTO j2 VALUES (1),(NULL)"
+  ],
+  "query": "SELECT j1.a, j2.a FROM j1 LEFT JOIN j2 ON j1.a=j2.a ORDER BY 1 NULLS LAST, 2 NULLS LAST",
+  "source": "pg_target:joins#85",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "joins",
+   "left join nulls"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(a INT, b INT)",
+   "INSERT INTO j1 VALUES (1,5),(2,7)",
+   "CREATE TABLE j2(a INT, c INT)",
+   "INSERT INTO j2 VALUES (1,1),(1,2),(3,1)"
+  ],
+  "query": "SELECT j1.a, j2.c FROM j1 LEFT JOIN j2 ON j1.a=j2.a AND j1.b > j2.c ORDER BY 1, 2 NULLS LAST",
+  "source": "pg_target:joins#86",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "joins",
+   "left join complex pred"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(a INT)",
+   "INSERT INTO j1 VALUES (1),(2)",
+   "CREATE TABLE j2(a INT)",
+   "INSERT INTO j2 VALUES (1),(3)"
+  ],
+  "query": "SELECT j1.a FROM j1 WHERE EXISTS (SELECT 1 FROM j2 WHERE j2.a=j1.a) AND NOT EXISTS (SELECT 1 FROM j2 WHERE j2.a=j1.a+1) ORDER BY j1.a",
+  "source": "pg_target:joins#87",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "joins",
+   "exists + not exists"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE m1(a INT, b INT)",
+   "INSERT INTO m1 VALUES (1,10),(2,20),(3,30)"
+  ],
+  "query": "SELECT a, b, CASE WHEN a=1 THEN 'one' WHEN a=2 THEN 'two' ELSE 'other' END FROM m1 ORDER BY a",
+  "source": "pg_target:misc#88",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "case"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE m1(a INT)",
+   "INSERT INTO m1 VALUES (1),(2),(NULL)"
+  ],
+  "query": "SELECT a, COALESCE(a,0), NULLIF(a,2), a IS NULL FROM m1 ORDER BY a NULLS LAST",
+  "source": "pg_target:misc#89",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "coalesce nullif"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT i, i*i, i%3 FROM generate_series(1,10) i ORDER BY i",
+  "source": "pg_target:misc#90",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "generate_series"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE m1(a INT)",
+   "INSERT INTO m1 VALUES (1),(2),(3),(4)"
+  ],
+  "query": "SELECT a FROM m1 TABLESAMPLE BERNOULLI (50) REPEATABLE (42) ORDER BY a",
+  "source": "pg_target:misc#91",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "seeded sample"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE m1(a INT, b INT)",
+   "INSERT INTO m1 VALUES (1,1),(2,2),(3,3),(4,4)"
+  ],
+  "query": "SELECT a FROM m1 WHERE (a,b) IN (SELECT b, a FROM m1 WHERE b<4) ORDER BY a",
+  "source": "pg_target:misc#92",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "row-wise IN"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE m1(a INT)",
+   "INSERT INTO m1 VALUES (1),(2),(3)"
+  ],
+  "query": "SELECT a FROM m1 WHERE (a > 1) = true AND (a < 3) IS NOT false ORDER BY a",
+  "source": "pg_target:misc#93",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "boolean compare"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE m1(a INT)",
+   "INSERT INTO m1 VALUES (1),(2),(3),(4),(5)"
+  ],
+  "query": "SELECT a, sum(a) OVER (ORDER BY a ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING) FROM m1 ORDER BY a",
+  "source": "pg_target:misc#94",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "reverse running total"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE m1(t TEXT)",
+   "INSERT INTO m1 VALUES ('2024-01-15'),('2024-03-20')"
+  ],
+  "query": "SELECT t::DATE, t::DATE + 7 FROM m1 ORDER BY t",
+  "source": "pg_target:misc#95",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "cast date"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE m1(a INT)",
+   "INSERT INTO m1 VALUES (1),(1),(2),(2),(2)"
+  ],
+  "query": "SELECT a, count(*), rank() OVER (ORDER BY count(*)) FROM m1 GROUP BY a ORDER BY a",
+  "source": "pg_target:misc#96",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "agg in window order"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE m1(a INT)",
+   "INSERT INTO m1 VALUES (3),(1),(2)"
+  ],
+  "query": "SELECT a, lag(a) OVER (ORDER BY a), lead(a,2) OVER (ORDER BY a) FROM m1 ORDER BY a",
+  "source": "pg_target:misc#97",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "lag lead"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE d1(a INT CHECK (a>0), b INT)",
+   "INSERT INTO d1 VALUES (1,5),(2,10),(3,15)"
+  ],
+  "query": "SELECT a FROM d1 WHERE b>7 ORDER BY a",
+  "source": "pg_target:domain#98",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "domain",
+   "check constraint"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE DOMAIN posint AS INT CHECK (VALUE > 0)",
+   "CREATE TABLE d1(a posint, b INT)",
+   "INSERT INTO d1 VALUES (1,5),(2,10)"
+  ],
+  "query": "SELECT a, a+1 FROM d1 ORDER BY a",
+  "source": "pg_target:domain#99",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "domain",
+   "domain type"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE v1(a INT, b INT)",
+   "INSERT INTO v1 VALUES (1,10),(2,20)",
+   "CREATE VIEW vv AS SELECT a, b*2 d FROM v1 WHERE a>0"
+  ],
+  "query": "SELECT a, d FROM vv WHERE d>10 ORDER BY a",
+  "source": "pg_target:view#100",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "view",
+   "view predicate push"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE v1(a INT, b INT)",
+   "INSERT INTO v1 VALUES (1,10),(2,20)",
+   "CREATE VIEW vv AS SELECT a, sum(b) t FROM v1 GROUP BY a"
+  ],
+  "query": "SELECT a, t FROM vv WHERE t>15 ORDER BY a",
+  "source": "pg_target:view#101",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "view",
+   "agg view filter"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, v INT)",
+   "INSERT INTO t1 VALUES (1,10),(2,20),(3,30)",
+   "CREATE TABLE t2(k INT, w INT)",
+   "INSERT INTO t2 VALUES (1,1),(1,3),(2,5)"
+  ],
+  "query": "SELECT t1.id, s.w, s.rn FROM t1 CROSS JOIN LATERAL (SELECT w, row_number() OVER (ORDER BY w) AS rn FROM t2 WHERE t2.k=t1.id) s ORDER BY t1.id, s.rn",
+  "source": "pg_target:lateral#102",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "lateral",
+   "window inside lateral"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT)",
+   "INSERT INTO t1 VALUES (1),(2),(9)",
+   "CREATE TABLE t2(k INT, w INT)",
+   "INSERT INTO t2 VALUES (1,1),(1,3),(2,5)"
+  ],
+  "query": "SELECT t1.id, s.cnt, s.tot FROM t1 LEFT JOIN LATERAL (SELECT count(*) AS cnt, sum(w) AS tot FROM t2 WHERE t2.k=t1.id) s ON true ORDER BY t1.id",
+  "source": "pg_target:lateral#103",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "lateral",
+   "lateral agg empty->0"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT)",
+   "INSERT INTO t1 VALUES (1),(2)",
+   "CREATE TABLE t2(k INT, w INT)",
+   "INSERT INTO t2 VALUES (1,1),(1,3),(2,5),(2,7)"
+  ],
+  "query": "SELECT t1.id, s.w, s.mx FROM t1, LATERAL (SELECT w, (SELECT max(w) FROM t2 x WHERE x.k=t1.id) AS mx FROM t2 WHERE t2.k=t1.id) s ORDER BY t1.id, s.w",
+  "source": "pg_target:lateral#104",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "lateral",
+   "nested corr scalar in lateral"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT)",
+   "INSERT INTO t1 VALUES (1),(2),(3)",
+   "CREATE TABLE t2(k INT, w INT)",
+   "INSERT INTO t2 VALUES (1,1),(2,5),(3,2)"
+  ],
+  "query": "SELECT t1.id, s.fw, s.c FROM t1 LEFT JOIN LATERAL (SELECT sum(w) FILTER (WHERE w>3) AS fw, count(*) AS c FROM t2 WHERE t2.k=t1.id) s ON true ORDER BY t1.id",
+  "source": "pg_target:lateral#105",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "lateral",
+   "lateral FILTER agg"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE a1(id INT, arr INT[])",
+   "INSERT INTO a1 VALUES (1,'{3,1,2}'),(2,'{5,4}'),(3,'{}'),(4,NULL)"
+  ],
+  "query": "SELECT id, u, row_number() OVER (PARTITION BY id ORDER BY u) AS rn FROM a1, LATERAL unnest(arr) u ORDER BY id, u",
+  "source": "pg_target:lateral#106",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "lateral",
+   "lateral unnest + outer window"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, v INT)",
+   "INSERT INTO t1 VALUES (1,2),(2,3)",
+   "CREATE TABLE t2(k INT)",
+   "INSERT INTO t2 VALUES (1),(2)"
+  ],
+  "query": "SELECT t1.id, s.i, s2.j FROM t1, LATERAL generate_series(1,t1.v) s(i), LATERAL (SELECT s.i*10+t1.id AS j) s2 ORDER BY t1.id, s.i",
+  "source": "pg_target:lateral#107",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "lateral",
+   "chained laterals"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT, v INT)",
+   "INSERT INTO g1 VALUES (1,10),(1,20),(2,30)",
+   "CREATE TABLE h1(k INT, w INT)",
+   "INSERT INTO h1 VALUES (1,5),(2,7)"
+  ],
+  "query": "SELECT g1.a, h1.k, sum(g1.v*h1.w), grouping(g1.a, h1.k) FROM g1 JOIN h1 ON g1.a=h1.k GROUP BY GROUPING SETS ((g1.a,h1.k),(g1.a),()) ORDER BY 1 NULLS LAST, 2 NULLS LAST",
+  "source": "pg_target:grouping#108",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "grouping",
+   "grouping sets over join"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT, b INT, v INT)",
+   "INSERT INTO g1 VALUES (1,1,10),(1,2,20),(2,1,30),(2,2,40)",
+   "CREATE TABLE h1(a INT)",
+   "INSERT INTO h1 VALUES (1),(2)"
+  ],
+  "query": "SELECT g1.a, g1.b, count(*) FROM g1 JOIN h1 ON g1.a=h1.a GROUP BY ROLLUP (g1.a, g1.b) HAVING count(*) >= 1 ORDER BY 1 NULLS LAST, 2 NULLS LAST",
+  "source": "pg_target:grouping#109",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "grouping",
+   "rollup join having"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT, b INT, v INT)",
+   "INSERT INTO g1 VALUES (1,1,10),(1,2,20),(2,1,30),(2,2,40)"
+  ],
+  "query": "SELECT a, b, sum(v) FROM g1 GROUP BY CUBE (a,b) HAVING sum(v) > 40 ORDER BY 1 NULLS LAST, 2 NULLS LAST",
+  "source": "pg_target:grouping#110",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "grouping",
+   "cube having threshold"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT, b INT, v INT)",
+   "INSERT INTO g1 VALUES (1,NULL,10),(1,2,20),(NULL,1,30),(2,2,40)"
+  ],
+  "query": "SELECT a, b, grouping(a) ga, grouping(b) gb, count(*) FROM g1 GROUP BY GROUPING SETS ((a),(b),(a,b),()) ORDER BY 1 NULLS LAST, 2 NULLS LAST, 3, 4",
+  "source": "pg_target:grouping#111",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "grouping",
+   "grouping sets nulls"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT, b INT, v INT)",
+   "INSERT INTO g1 VALUES (1,1,10),(1,2,20),(2,1,30)"
+  ],
+  "query": "SELECT a, b, t FROM (SELECT a, b, sum(v) AS t, grouping(a,b) AS g FROM g1 GROUP BY GROUPING SETS ((a,b),(a),())) s WHERE g=0 ORDER BY a, b",
+  "source": "pg_target:grouping#112",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "grouping",
+   "grouping() outer filter"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT, v INT)",
+   "INSERT INTO g1 VALUES (1,10),(1,20),(2,30),(3,40)"
+  ],
+  "query": "SELECT a, sum(v), count(*) FILTER (WHERE v>15) FROM g1 GROUP BY ROLLUP(a) HAVING grouping(a)=0 OR sum(v)>100 ORDER BY a NULLS LAST",
+  "source": "pg_target:grouping#113",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "grouping",
+   "rollup grouping() in having"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TYPE pt AS (x INT, y INT)",
+   "CREATE TABLE c1(id INT, arr pt[])",
+   "INSERT INTO c1 VALUES (1,'{\"(1,2)\",\"(3,4)\"}'),(2,'{\"(5,6)\"}'),(3,'{}'),(4,NULL)"
+  ],
+  "query": "SELECT id, u.x, u.y FROM c1, LATERAL unnest(arr) u ORDER BY id, u.x NULLS LAST, u.y NULLS LAST",
+  "source": "pg_target:array#114",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "array",
+   "composite array unnest"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TYPE pt2 AS (x INT, y INT)",
+   "CREATE TABLE c1(id INT, arr pt2[])",
+   "INSERT INTO c1 VALUES (1,'{\"(1,10)\",\"(2,20)\"}'),(2,'{\"(3,30)\"}')"
+  ],
+  "query": "SELECT id, sum(u.x), max(u.y) FROM c1, LATERAL unnest(arr) u GROUP BY id ORDER BY id",
+  "source": "pg_target:array#115",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "array",
+   "agg over composite unnest"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE a1(id INT, a INT[], b TEXT[])",
+   "INSERT INTO a1 VALUES (1,'{10,20}','{x,y,z}'),(2,'{30,40,50}','{p}'),(3,'{}','{q}')"
+  ],
+  "query": "SELECT id, u.i, u.t FROM a1, LATERAL unnest(a, b) AS u(i,t) ORDER BY id, u.i NULLS LAST, u.t NULLS LAST",
+  "source": "pg_target:array#116",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "array",
+   "multi-arg unnest ragged"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE a1(id INT, arr INT[])",
+   "INSERT INTO a1 VALUES (1,'{7,8,9}'),(2,'{4}'),(3,'{}'),(4,NULL)"
+  ],
+  "query": "SELECT id, u.e, u.n FROM a1 LEFT JOIN LATERAL unnest(arr) WITH ORDINALITY AS u(e,n) ON true ORDER BY id, u.n NULLS LAST",
+  "source": "pg_target:array#117",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "array",
+   "unnest ordinality left join"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TYPE pr AS (f1 INT, f2 TEXT)",
+   "CREATE TABLE c1(id INT, r pr)",
+   "INSERT INTO c1 VALUES (1,ROW(1,'a')::pr),(2,ROW(2,'b')::pr),(3,NULL)"
+  ],
+  "query": "SELECT id, (r).f1, (r).f2, r IS NOT NULL FROM c1 ORDER BY id",
+  "source": "pg_target:array#118",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "array",
+   "composite column fields"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE a1(id INT, v INT)",
+   "INSERT INTO a1 VALUES (1,5),(1,3),(2,7)"
+  ],
+  "query": "SELECT id, array_agg(a1 ORDER BY v) FROM a1 GROUP BY id ORDER BY id",
+  "source": "pg_target:array#119",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "array",
+   "array_agg whole row"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE a1(id INT, arr INT[])",
+   "INSERT INTO a1 VALUES (1,'{5,3,9,1}'),(2,'{8,8}'),(3,NULL)"
+  ],
+  "query": "SELECT id, u.e, u.n FROM a1, LATERAL unnest(arr) WITH ORDINALITY u(e,n) WHERE u.n <= 2 ORDER BY id, u.n",
+  "source": "pg_target:array#120",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "array",
+   "ordinality filter"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE a1(id INT, a INT[])",
+   "INSERT INTO a1 VALUES (1,'{10,20,30}'),(2,'{40}')"
+  ],
+  "query": "SELECT id, u.g, u.e FROM a1, LATERAL ROWS FROM (generate_series(1,2), unnest(a1.a)) AS u(g,e) ORDER BY id, u.g, u.e NULLS LAST",
+  "source": "pg_target:array#121",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "array",
+   "ROWS FROM lateral"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":[1,2,3]}'),(2,'{\"a\":[4]}'),(3,'{\"b\":1}'),(4,NULL)"
+  ],
+  "query": "SELECT id, q FROM j1, LATERAL jsonb_path_query(j, '$.a[*]') q ORDER BY id, q",
+  "source": "pg_target:jsonb#122",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "jsonb",
+   "jsonb_path_query elems"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":[1,5]}'),(2,'{\"a\":[2]}'),(3,'{}')"
+  ],
+  "query": "SELECT id FROM j1 WHERE jsonb_path_exists(j, '$.a[*] ? (@ > 3)') ORDER BY id",
+  "source": "pg_target:jsonb#123",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "jsonb",
+   "jsonb_path_exists pred"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":1,\"b\":2}'),(2,'{\"b\":3}'),(3,'{}')"
+  ],
+  "query": "SELECT id, kv.k, kv.v FROM j1, LATERAL jsonb_each_text(j) kv(k,v) ORDER BY id, kv.k",
+  "source": "pg_target:jsonb#124",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "jsonb",
+   "jsonb_each_text pairs"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":1,\"b\":2}'),(2,'{\"c\":3}')"
+  ],
+  "query": "SELECT id, jsonb_object_agg(kv.k, kv.v) FROM j1, LATERAL jsonb_each(j) kv(k,v) GROUP BY id ORDER BY id",
+  "source": "pg_target:jsonb#125",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "jsonb",
+   "jsonb_object_agg roundtrip"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE m1(a INT, b TEXT)",
+   "INSERT INTO m1 VALUES (1,'x'),(2,NULL)"
+  ],
+  "query": "SELECT a, to_jsonb(m1) FROM m1 ORDER BY a",
+  "source": "pg_target:jsonb#126",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "jsonb",
+   "to_jsonb whole row"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":{\"b\":7}}'),(2,'{\"a\":{\"b\":8}}'),(3,'{\"a\":{}}')"
+  ],
+  "query": "SELECT id FROM j1 WHERE j @? '$.a.b ? (@ > 6)' ORDER BY id",
+  "source": "pg_target:jsonb#127",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "jsonb",
+   "jsonpath @? operator"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":5}'),(2,'{\"a\":15}'),(3,'{}')"
+  ],
+  "query": "SELECT id FROM j1 WHERE j @@ '$.a > 10' ORDER BY id",
+  "source": "pg_target:jsonb#128",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "jsonb",
+   "jsonpath @@ operator"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":[10,20]}'),(2,'{\"a\":[30]}')"
+  ],
+  "query": "SELECT id, jsonb_path_query_array(j, '$.a[*] ? (@ > 15)') FROM j1 ORDER BY id",
+  "source": "pg_target:jsonb#129",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "jsonb",
+   "jsonb_path_query_array"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TYPE pr3 AS (f1 INT, f2 TEXT)",
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"f1\":1,\"f2\":\"a\"}'),(2,'{\"f1\":2}'),(3,'{}')"
+  ],
+  "query": "SELECT id, p.f1, p.f2 FROM j1, LATERAL jsonb_populate_record(NULL::pr3, j1.j) p ORDER BY id",
+  "source": "pg_target:jsonb#130",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "jsonb",
+   "jsonb_populate_record"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(src INT, dst INT)",
+   "INSERT INTO g1 VALUES (1,2),(2,3),(3,1),(3,4),(4,5)"
+  ],
+  "query": "WITH RECURSIVE sg(node, depth) AS (SELECT g.dst, 0 FROM g1 g WHERE g.src=1 UNION ALL SELECT g.dst, sg.depth+1 FROM g1 g, sg WHERE g.src=sg.node) CYCLE node SET cyc USING pth SELECT node, depth, cyc FROM sg ORDER BY node, depth",
+  "source": "pg_target:recursive#131",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "recursive",
+   "cycle detection"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, parent INT)",
+   "INSERT INTO r1 VALUES (1,NULL),(2,1),(3,1),(4,2),(5,2),(6,3)"
+  ],
+  "query": "WITH RECURSIVE bfs AS (SELECT id, parent, 0 AS d FROM r1 WHERE parent IS NULL UNION ALL SELECT r.id, r.parent, b.d+1 FROM r1 r JOIN bfs b ON r.parent=b.id) SEARCH BREADTH FIRST BY id SET o SELECT id, d, o FROM bfs ORDER BY o",
+  "source": "pg_target:recursive#132",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "recursive",
+   "search breadth first"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, parent INT)",
+   "INSERT INTO r1 VALUES (1,NULL),(2,1),(3,1),(4,2),(5,3)"
+  ],
+  "query": "WITH RECURSIVE dfs AS (SELECT id, parent, 0 AS d FROM r1 WHERE parent IS NULL UNION ALL SELECT r.id, r.parent, s.d+1 FROM r1 r JOIN dfs s ON r.parent=s.id) SEARCH DEPTH FIRST BY id SET o SELECT id, d, o FROM dfs ORDER BY o",
+  "source": "pg_target:recursive#133",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "recursive",
+   "search depth first"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT, b INT)",
+   "INSERT INTO g1 VALUES (1,2),(2,3),(3,4),(2,5),(5,5)"
+  ],
+  "query": "WITH RECURSIVE t(n) AS (SELECT a FROM g1 WHERE a=1 UNION SELECT g.b FROM g1 g JOIN t ON g.a=t.n) SELECT n FROM t ORDER BY n",
+  "source": "pg_target:recursive#134",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "recursive",
+   "recursive union dedup selfloop"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, parent INT)",
+   "INSERT INTO r1 VALUES (1,NULL),(2,1),(3,1),(4,2),(5,4)"
+  ],
+  "query": "WITH RECURSIVE tr AS (SELECT id, parent, 1 AS lvl, ARRAY[id] AS path FROM r1 WHERE parent IS NULL UNION ALL SELECT r.id, r.parent, t.lvl+1, t.path||r.id FROM r1 r JOIN tr t ON r.parent=t.id WHERE NOT r.id = ANY(t.path)) SELECT tr.id, tr.lvl, r1.parent FROM tr JOIN r1 ON tr.id=r1.id ORDER BY tr.id",
+  "source": "pg_target:recursive#135",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "recursive",
+   "manual path cycle + join"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE w1(g INT, v INT)",
+   "INSERT INTO w1 VALUES (1,10),(1,20),(1,30),(2,5),(2,15)"
+  ],
+  "query": "SELECT g, v, sum(v) OVER wa, max(v) OVER wb, count(*) OVER w FROM w1 WINDOW w AS (PARTITION BY g ORDER BY v), wa AS (w ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW), wb AS (w ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING) ORDER BY g, v",
+  "source": "pg_target:window#136",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "window",
+   "named window chaining"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE w1(g INT, v NUMERIC)",
+   "INSERT INTO w1 VALUES (1,10),(1,10),(1,20),(1,30),(2,5)"
+  ],
+  "query": "SELECT g, v, sum(v) OVER (PARTITION BY g ORDER BY v RANGE BETWEEN 5 PRECEDING AND 10 FOLLOWING EXCLUDE TIES) FROM w1 ORDER BY g, v",
+  "source": "pg_target:window#137",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "window",
+   "RANGE offset EXCLUDE TIES"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE w1(g INT, v INT)",
+   "INSERT INTO w1 VALUES (1,10),(1,10),(1,20),(2,5),(2,5)"
+  ],
+  "query": "SELECT g, v, count(*) OVER (PARTITION BY g ORDER BY v GROUPS BETWEEN 1 PRECEDING AND CURRENT ROW EXCLUDE CURRENT ROW) FROM w1 ORDER BY g, v",
+  "source": "pg_target:window#138",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "window",
+   "GROUPS EXCLUDE CURRENT ROW"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE w1(g INT, v INT)",
+   "INSERT INTO w1 VALUES (1,10),(1,20),(1,30),(2,5),(2,15),(2,25)"
+  ],
+  "query": "SELECT g, v, sum(v) FILTER (WHERE v>10) OVER (PARTITION BY g ORDER BY v ROWS UNBOUNDED PRECEDING) FROM w1 ORDER BY g, v",
+  "source": "pg_target:window#139",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "window",
+   "window FILTER running"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE w1(g INT, v INT)",
+   "INSERT INTO w1 VALUES (1,10),(1,10),(1,20),(2,5),(2,15)"
+  ],
+  "query": "SELECT g, count(DISTINCT v) FILTER (WHERE v>10), sum(DISTINCT v) FILTER (WHERE v<20), count(DISTINCT v) FROM w1 GROUP BY g ORDER BY g",
+  "source": "pg_target:window#140",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "window",
+   "distinct aggs + FILTER"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE w1(g INT, v INT)",
+   "INSERT INTO w1 VALUES (1,10),(1,20),(2,5),(2,15),(2,25)"
+  ],
+  "query": "SELECT g, v, avg(v) OVER (PARTITION BY g ORDER BY v ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING EXCLUDE GROUP), min(v) OVER (PARTITION BY g ORDER BY v DESC) FROM w1 ORDER BY g, v",
+  "source": "pg_target:window#141",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "window",
+   "EXCLUDE GROUP + desc order"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE p1(a INT, b INT) PARTITION BY RANGE (a)",
+   "CREATE TABLE p1_0 PARTITION OF p1 FOR VALUES FROM (0) TO (50)",
+   "CREATE TABLE p1_1 PARTITION OF p1 FOR VALUES FROM (50) TO (100)",
+   "CREATE TABLE q1(a INT, c INT) PARTITION BY RANGE (a)",
+   "CREATE TABLE q1_0 PARTITION OF q1 FOR VALUES FROM (0) TO (50)",
+   "CREATE TABLE q1_1 PARTITION OF q1 FOR VALUES FROM (50) TO (100)",
+   "INSERT INTO p1 VALUES (10,1),(20,2),(60,3),(70,4)",
+   "INSERT INTO q1 VALUES (10,100),(20,200),(60,300),(90,400)"
+  ],
+  "query": "SELECT p1.a, p1.b, q1.c FROM p1 JOIN q1 ON p1.a=q1.a ORDER BY p1.a",
+  "source": "pg_target:partition#142",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "partition",
+   "identical partitionwise join"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE p1(a INT, b INT) PARTITION BY RANGE (a)",
+   "CREATE TABLE p1_0 PARTITION OF p1 FOR VALUES FROM (0) TO (50)",
+   "CREATE TABLE p1_1 PARTITION OF p1 FOR VALUES FROM (50) TO (100)",
+   "INSERT INTO p1 VALUES (10,1),(20,2),(60,3),(70,4)",
+   "UPDATE p1 SET a = a + 60 WHERE a < 30"
+  ],
+  "query": "SELECT a, b FROM p1 ORDER BY a",
+  "source": "pg_target:partition#143",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "partition",
+   "update row movement then read"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE p1(a INT, b INT) PARTITION BY LIST (a)",
+   "CREATE TABLE p1_a PARTITION OF p1 FOR VALUES IN (1,2,3)",
+   "CREATE TABLE p1_b PARTITION OF p1 FOR VALUES IN (4,5,6)",
+   "CREATE TABLE p1_d PARTITION OF p1 DEFAULT",
+   "INSERT INTO p1 VALUES (1,10),(4,40),(7,70),(9,90)"
+  ],
+  "query": "SELECT a, b FROM p1 WHERE a IN (1,4,7) OR a = 9 ORDER BY a",
+  "source": "pg_target:partition#144",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "partition",
+   "list prune IN/OR + default"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE p1(a INT, b INT) PARTITION BY RANGE (a)",
+   "CREATE TABLE p1_0 PARTITION OF p1 FOR VALUES FROM (0) TO (50)",
+   "CREATE TABLE p1_1 PARTITION OF p1 FOR VALUES FROM (50) TO (100)",
+   "INSERT INTO p1 VALUES (10,1),(20,2),(60,3),(70,4)",
+   "CREATE INDEX pi_b ON p1(b)"
+  ],
+  "query": "SELECT a, b FROM p1 WHERE b = 3 OR b = 4 ORDER BY a",
+  "source": "pg_target:partition#145",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "partition",
+   "partitioned index probe"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE p1(a INT, b INT) PARTITION BY RANGE (a)",
+   "CREATE TABLE p1_0 PARTITION OF p1 FOR VALUES FROM (0) TO (50)",
+   "CREATE TABLE p1_1 PARTITION OF p1 FOR VALUES FROM (50) TO (100)",
+   "CREATE TABLE p1_d PARTITION OF p1 DEFAULT",
+   "INSERT INTO p1 VALUES (10,1),(60,3),(150,9)"
+  ],
+  "query": "SELECT a, b FROM p1 WHERE a >= 100 ORDER BY a",
+  "source": "pg_target:partition#146",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "partition",
+   "default partition catch"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE p1(a INT, b INT) PARTITION BY HASH (a)",
+   "CREATE TABLE p1_0 PARTITION OF p1 FOR VALUES WITH (MODULUS 4, REMAINDER 0)",
+   "CREATE TABLE p1_1 PARTITION OF p1 FOR VALUES WITH (MODULUS 4, REMAINDER 1)",
+   "CREATE TABLE p1_2 PARTITION OF p1 FOR VALUES WITH (MODULUS 4, REMAINDER 2)",
+   "CREATE TABLE p1_3 PARTITION OF p1 FOR VALUES WITH (MODULUS 4, REMAINDER 3)",
+   "INSERT INTO p1 SELECT i, i*10 FROM generate_series(1,24) i"
+  ],
+  "query": "SELECT a, b FROM p1 WHERE a = 5 OR a = 12 ORDER BY a",
+  "source": "pg_target:partition#147",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "partition",
+   "hash prune eq"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE p1(a INT, b INT) PARTITION BY RANGE (a)",
+   "CREATE TABLE p1_0 PARTITION OF p1 FOR VALUES FROM (0) TO (50)",
+   "CREATE TABLE p1_1 PARTITION OF p1 FOR VALUES FROM (50) TO (100)",
+   "CREATE TABLE p1_2 PARTITION OF p1 FOR VALUES FROM (100) TO (200)",
+   "INSERT INTO p1 SELECT i, i%7 FROM generate_series(1,150) i"
+  ],
+  "query": "SELECT (a/50) AS bucket, count(*), sum(b) FROM p1 GROUP BY 1 ORDER BY 1",
+  "source": "pg_target:partition#148",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "partition",
+   "agg across partitions"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE p1(a INT, b INT) PARTITION BY RANGE (a)",
+   "CREATE TABLE p1_0 PARTITION OF p1 FOR VALUES FROM (0) TO (50)",
+   "CREATE TABLE p1_1 PARTITION OF p1 FOR VALUES FROM (50) TO (100)",
+   "INSERT INTO p1 VALUES (10,1),(20,2),(60,3)",
+   "CREATE TABLE q1(a INT, c INT) PARTITION BY RANGE (a)",
+   "CREATE TABLE q1_0 PARTITION OF q1 FOR VALUES FROM (0) TO (30)",
+   "CREATE TABLE q1_1 PARTITION OF q1 FOR VALUES FROM (30) TO (100)",
+   "INSERT INTO q1 VALUES (10,9),(60,8)"
+  ],
+  "query": "SELECT p1.a, q1.c FROM p1 LEFT JOIN q1 ON p1.a=q1.a ORDER BY p1.a",
+  "source": "pg_target:partition#149",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "partition",
+   "mismatched bounds join"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT CHECK (a BETWEEN 0 AND 100), b INT GENERATED ALWAYS AS (a*3) STORED)",
+   "INSERT INTO g1(a) VALUES (0),(5),(33),(100)"
+  ],
+  "query": "SELECT a, b FROM g1 WHERE a >= -1 ORDER BY a",
+  "source": "pg_target:gen_col#150",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "gen_col",
+   "generated + range check"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT, b INT GENERATED ALWAYS AS (a % 3) STORED, c INT CHECK (c > 0))",
+   "INSERT INTO g1(a,c) VALUES (7,10),(9,5),(10,1)"
+  ],
+  "query": "SELECT a, b, c FROM g1 WHERE b = 0 OR c > 100 ORDER BY a",
+  "source": "pg_target:gen_col#151",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "gen_col",
+   "generated + check sibling"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT, b INT GENERATED ALWAYS AS (a*2) STORED, UNIQUE(a,b))",
+   "INSERT INTO g1(a) VALUES (1),(2),(3)"
+  ],
+  "query": "SELECT a, b FROM g1 WHERE b IN (2,4,8) ORDER BY a",
+  "source": "pg_target:gen_col#152",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "gen_col",
+   "generated in unique + IN"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE d1(a INT CHECK (a>0), b INT CHECK (b BETWEEN 0 AND 10), v INT)",
+   "INSERT INTO d1 VALUES (1,5,10),(2,0,20),(3,10,30)"
+  ],
+  "query": "SELECT a, b, v FROM d1 WHERE b < 11 AND a > -5 ORDER BY a",
+  "source": "pg_target:domain#153",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "domain",
+   "two checks looser preds"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE d1(a INT, v INT)",
+   "INSERT INTO d1 VALUES (1,10),(2,20)",
+   "ALTER TABLE d1 ADD CONSTRAINT pos CHECK (a > 0) NOT VALID"
+  ],
+  "query": "SELECT a, v FROM d1 WHERE a > -1 ORDER BY a",
+  "source": "pg_target:domain#154",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "domain",
+   "not-valid check"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE d1(a INT, CONSTRAINT lo CHECK (a >= 0), CONSTRAINT hi CHECK (a <= 50), v INT)",
+   "INSERT INTO d1 VALUES (0,1),(25,2),(50,3)"
+  ],
+  "query": "SELECT a, v FROM d1 WHERE a >= -10 AND a <= 60 ORDER BY a",
+  "source": "pg_target:domain#155",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "domain",
+   "named check pair"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE n1(a NUMERIC(12,4), f FLOAT8)",
+   "INSERT INTO n1 VALUES (0.1,0.1),(1.5,1.5),(2.675,2.675),(100.001,100.001)"
+  ],
+  "query": "SELECT a, f, a = f AS eq, a < f AS lt, a > f AS gt, CAST(f AS NUMERIC(12,4)) = a AS feq FROM n1 ORDER BY a",
+  "source": "pg_target:numeric#156",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "numeric",
+   "numeric vs float8 cmp"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE n1(a NUMERIC(10,2))",
+   "INSERT INTO n1 VALUES (1.005),(2.675),(0.125),(-1.005),(9999999.995)"
+  ],
+  "query": "SELECT a, a::NUMERIC(10,1) AS a1, round(a,1) AS r1, trunc(a,1) AS t1 FROM n1 ORDER BY a",
+  "source": "pg_target:numeric#157",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "numeric",
+   "scale narrowing cast"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE n1(a NUMERIC)",
+   "INSERT INTO n1 VALUES ('NaN'),('Infinity'),('-Infinity'),(1.5),(0),(-1.5)"
+  ],
+  "query": "SELECT a, a = 'NaN'::NUMERIC AS isnan_eq, a > 0 AS gt0, rank() OVER (ORDER BY a) FROM n1 ORDER BY a",
+  "source": "pg_target:numeric#158",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "numeric",
+   "numeric NaN Inf order"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE n1(a NUMERIC(38,20), b NUMERIC(38,20))",
+   "INSERT INTO n1 VALUES (0.00000000000000000001, 999999999999999999.99),(123456789.123456789, 0.00000000000000000001)"
+  ],
+  "query": "SELECT a, b, a+b, a*b, b/a FROM n1 ORDER BY a",
+  "source": "pg_target:numeric#159",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "numeric",
+   "extreme scale arith"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE n1(a NUMERIC(10,3), b INT)",
+   "INSERT INTO n1 VALUES (10.5,2),(7.25,3),(-9.5,4),(100,7)"
+  ],
+  "query": "SELECT a, b, mod(a, b::NUMERIC), a % b, div(a, b::NUMERIC), a/b FROM n1 ORDER BY a",
+  "source": "pg_target:numeric#160",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "numeric",
+   "numeric mod div"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE n1(a DOUBLE PRECISION, b NUMERIC(25,5))",
+   "INSERT INTO n1 VALUES (1e308, 1e15),(-1e308,-1e15),(0.0,0.00001),('Infinity', 9.9)"
+  ],
+  "query": "SELECT a, b, a > b AS agtb, b > a AS bgta FROM n1 ORDER BY a",
+  "source": "pg_target:numeric#161",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "numeric",
+   "float8 huge vs numeric"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE i1(t TIMESTAMP, z TIMESTAMPTZ)",
+   "INSERT INTO i1 VALUES ('2024-03-10 02:30:00','2024-03-10 02:30:00+00'),('2024-11-03 01:30:00','2024-11-03 01:30:00+00')"
+  ],
+  "query": "SELECT t, t AT TIME ZONE 'UTC', z AT TIME ZONE 'UTC', (z AT TIME ZONE 'America/New_York') AT TIME ZONE 'UTC' FROM i1 ORDER BY t",
+  "source": "pg_target:interval#162",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "interval",
+   "at time zone roundtrip"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE i1(t TIMESTAMP)",
+   "INSERT INTO i1 VALUES ('2024-03-15 10:45:30'),('2024-03-31 23:59:59'),('2024-01-01 00:00:00')"
+  ],
+  "query": "SELECT t, date_trunc('month',t) m, date_trunc('hour',t) h, date_trunc('quarter',t) q, date_trunc('week',t) w FROM i1 ORDER BY t",
+  "source": "pg_target:interval#163",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "interval",
+   "date_trunc fields"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE i1(t TIMESTAMP, d DATE)",
+   "INSERT INTO i1 VALUES ('2024-03-10 15:30:00','2024-03-10'),('2024-12-25 00:00:00','2024-12-25')"
+  ],
+  "query": "SELECT t, extract(epoch FROM t) e, extract(isodow FROM t) dw, extract(doy FROM d) dy, date_part('hour',t) hh FROM i1 ORDER BY t",
+  "source": "pg_target:interval#164",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "interval",
+   "extract fields"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE i1(a TIMESTAMP, b TIMESTAMP)",
+   "INSERT INTO i1 VALUES ('2024-01-15 10:00:00','2024-03-20 12:30:45'),('2000-02-29 00:00:00','2001-02-28 00:00:00')"
+  ],
+  "query": "SELECT a, b, age(b,a), justify_days(age(b,a)), justify_hours(INTERVAL '25 hours') FROM i1 ORDER BY a",
+  "source": "pg_target:interval#165",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "interval",
+   "age + justify"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE i1(s TIMESTAMP, e TIMESTAMP, s2 TIMESTAMP, e2 TIMESTAMP)",
+   "INSERT INTO i1 VALUES ('2024-01-01','2024-01-10','2024-01-05','2024-01-20'),('2024-02-01','2024-02-05','2024-02-10','2024-02-15'),('2024-03-01','2024-03-10','2024-03-01','2024-03-10')"
+  ],
+  "query": "SELECT s, (s,e) OVERLAPS (s2,e2) AS ov, (s,e) OVERLAPS (s2,s2) AS point FROM i1 ORDER BY s",
+  "source": "pg_target:interval#166",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "interval",
+   "overlaps operator"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE i1(t TIMESTAMP)",
+   "INSERT INTO i1 VALUES ('2024-03-10 10:07:00'),('2024-03-10 10:14:59'),('2024-03-10 10:15:00')"
+  ],
+  "query": "SELECT t, date_bin('15 minutes', t, TIMESTAMP '2001-01-01') b FROM i1 ORDER BY t",
+  "source": "pg_target:interval#167",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "interval",
+   "date_bin"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE i1(d DATE)",
+   "INSERT INTO i1 VALUES ('2024-02-29'),('2024-01-15'),('2023-12-31')"
+  ],
+  "query": "SELECT d, d - date_trunc('month', d)::date AS dom_off, make_date(extract(year FROM d)::int, extract(month FROM d)::int, 1) AS first FROM i1 ORDER BY d",
+  "source": "pg_target:interval#168",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "interval",
+   "date arith + make_date"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, s TEXT)",
+   "INSERT INTO t1 VALUES (1,'hello world'),(2,'abcdef'),(3,'aaa bbb'),(4,'xyzzy')"
+  ],
+  "query": "SELECT id, position('b' IN s), overlay(s PLACING 'XX' FROM 2 FOR 3), translate(s,'ab','AB'), left(s,3), right(s,-2) FROM t1 ORDER BY id",
+  "source": "pg_target:string#169",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "string",
+   "position overlay translate"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, s TEXT)",
+   "INSERT INTO t1 VALUES (1,'abc123'),(2,'ab12'),(3,'a1b2c3'),(4,'xyz'),(5,'12abc')"
+  ],
+  "query": "SELECT id FROM t1 WHERE s SIMILAR TO '[a-z]+[0-9]+' OR s SIMILAR TO 'x_y%' ORDER BY id",
+  "source": "pg_target:string#170",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "string",
+   "similar to"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, s TEXT)",
+   "INSERT INTO t1 VALUES (1,'key=42'),(2,'k=7,x=9'),(3,'nope'),(4,'a=1,b=22,c=333')"
+  ],
+  "query": "SELECT id, m[1], m[2] FROM t1, LATERAL regexp_match(s, '([a-z]+)=([0-9]+)') m ORDER BY id, m[1] NULLS LAST, m[2] NULLS LAST",
+  "source": "pg_target:string#171",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "string",
+   "regexp_match groups"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, s TEXT COLLATE \"C\")",
+   "INSERT INTO t1 VALUES (1,'Apple'),(2,'apple'),(3,'Banana'),(4,'banana'),(5,'10')"
+  ],
+  "query": "SELECT id, s FROM t1 WHERE s LIKE 'a%' OR s ILIKE 'b%' ORDER BY id",
+  "source": "pg_target:string#172",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "string",
+   "like with C collation"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, s TEXT)",
+   "INSERT INTO t1 VALUES (1,'a1b22c333'),(2,'x9'),(3,'none')"
+  ],
+  "query": "SELECT id, (regexp_match(s, '([0-9]+)([a-z]*)'))[1] g1, (regexp_match(s, '([0-9]+)([a-z]*)'))[2] g2, substring(s FROM '([a-z]+)([0-9]+)') FROM t1 ORDER BY id",
+  "source": "pg_target:string#173",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "string",
+   "regexp group index"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, s TEXT)",
+   "INSERT INTO t1 VALUES (1,'foo_bar_baz'),(2,'a-b-c'),(3,'x  y')"
+  ],
+  "query": "SELECT id, split_part(s,'_',2), regexp_replace(s,'[_-]','+','g'), strpos(s,'b'), initcap(s) FROM t1 ORDER BY id",
+  "source": "pg_target:string#174",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "string",
+   "split regex strpos"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, s TEXT)",
+   "INSERT INTO t1 VALUES (1,'abc'),(2,'Abc'),(3,'ABC'),(4,'abd')"
+  ],
+  "query": "SELECT id FROM t1 WHERE s ~* '^ab' AND s !~ 'z' ORDER BY id",
+  "source": "pg_target:string#175",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "string",
+   "regex case ops"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT)",
+   "INSERT INTO s1 VALUES (1),(2),(3)",
+   "CREATE TABLE s2(a INT)",
+   "INSERT INTO s2 VALUES (2),(3),(4)",
+   "CREATE TABLE s3(a INT)",
+   "INSERT INTO s3 VALUES (3),(5)"
+  ],
+  "query": "SELECT u.a, s3.a FROM ((SELECT a FROM s1 UNION SELECT a FROM s2) INTERSECT SELECT a FROM s3) u JOIN s3 ON u.a=s3.a ORDER BY u.a",
+  "source": "pg_target:setop#176",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "setop",
+   "paren union intersect join"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT)",
+   "INSERT INTO s1 VALUES (1),(2),(3),(3)",
+   "CREATE TABLE s2(a INT)",
+   "INSERT INTO s2 VALUES (3),(3),(4)",
+   "CREATE TABLE s3(a INT)",
+   "INSERT INTO s3 VALUES (3)"
+  ],
+  "query": "SELECT u.a, s3.a FROM (SELECT a FROM s1 UNION ALL SELECT a FROM s2 EXCEPT SELECT a FROM s3) u JOIN s3 ON true ORDER BY u.a",
+  "source": "pg_target:setop#177",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "setop",
+   "unionall except precedence"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT)",
+   "INSERT INTO s1 VALUES (1),(2),(NULL)",
+   "CREATE TABLE s2(a INT)",
+   "INSERT INTO s2 VALUES (2),(NULL),(4)",
+   "CREATE TABLE s3(a INT)",
+   "INSERT INTO s3 VALUES (1),(2)"
+  ],
+  "query": "SELECT u.a, s3.a FROM ((SELECT a FROM s1 EXCEPT SELECT a FROM s2) UNION ALL (SELECT a FROM s2 EXCEPT SELECT a FROM s1)) u LEFT JOIN s3 ON u.a=s3.a ORDER BY u.a NULLS LAST, s3.a NULLS LAST",
+  "source": "pg_target:setop#178",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "setop",
+   "symmetric difference nulls"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT)",
+   "INSERT INTO s1 VALUES (1),(2),(2),(3)",
+   "CREATE TABLE s2(a INT)",
+   "INSERT INTO s2 VALUES (2),(2),(4)"
+  ],
+  "query": "SELECT u.a, count(*) FROM (SELECT a FROM s1 INTERSECT ALL SELECT a FROM s2) u, s1 WHERE s1.a >= u.a GROUP BY u.a ORDER BY u.a",
+  "source": "pg_target:setop#179",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "setop",
+   "intersect all then agg"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT)",
+   "INSERT INTO s1 VALUES (1),(2)",
+   "CREATE TABLE s2(a INT)",
+   "INSERT INTO s2 VALUES (2),(3)",
+   "CREATE TABLE s3(a INT)",
+   "INSERT INTO s3 VALUES (2),(4)"
+  ],
+  "query": "SELECT u.a FROM (SELECT a FROM s1 UNION SELECT a FROM s2 UNION SELECT a FROM s3) u WHERE u.a > ALL (SELECT a/2 FROM s3) ORDER BY u.a",
+  "source": "pg_target:setop#180",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "setop",
+   "3-way union + ALL"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(a INT)",
+   "INSERT INTO t1 VALUES (1),(2),(3),(NULL)",
+   "CREATE TABLE t2(k INT)",
+   "INSERT INTO t2 VALUES (1),(3)"
+  ],
+  "query": "SELECT a, EXISTS (SELECT 1 FROM t2 WHERE t2.k=t1.a) AS e, NOT EXISTS (SELECT 1 FROM t2 WHERE t2.k=t1.a+1) AS ne FROM t1 ORDER BY a NULLS LAST",
+  "source": "pg_target:subquery#181",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "subquery",
+   "exists in select clause"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(a INT)",
+   "INSERT INTO t1 VALUES (1),(2),(9)",
+   "CREATE TABLE t2(k INT, w TEXT)",
+   "INSERT INTO t2 VALUES (1,'one'),(2,'two')"
+  ],
+  "query": "SELECT a, (SELECT w FROM t2 WHERE t2.k=t1.a) AS w FROM t1 ORDER BY a",
+  "source": "pg_target:subquery#182",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "subquery",
+   "scalar subq null miss"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(a INT)",
+   "INSERT INTO t1 VALUES (1),(2),(3)",
+   "CREATE TABLE t2(k INT)",
+   "INSERT INTO t2 VALUES (1),(1),(2)"
+  ],
+  "query": "SELECT a FROM t1 WHERE (SELECT count(*) FROM t2 WHERE t2.k=t1.a) BETWEEN 1 AND 1 ORDER BY a",
+  "source": "pg_target:subquery#183",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "subquery",
+   "scalar count in where"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(a INT, b INT)",
+   "INSERT INTO t1 VALUES (1,5),(2,15),(3,25)",
+   "CREATE TABLE t2(k INT, w INT)",
+   "INSERT INTO t2 VALUES (1,10),(2,10),(3,30)"
+  ],
+  "query": "SELECT t1.a FROM t1 WHERE t1.b < SOME (SELECT w FROM t2 WHERE t2.k <> t1.a) ORDER BY t1.a",
+  "source": "pg_target:subquery#184",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "subquery",
+   "SOME correlated anti"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(a INT)",
+   "INSERT INTO t1 VALUES (1),(2),(3)",
+   "CREATE TABLE t2(k INT)",
+   "INSERT INTO t2 VALUES (1),(2)"
+  ],
+  "query": "SELECT a FROM t1 GROUP BY a HAVING EXISTS (SELECT 1 FROM t2 WHERE t2.k=t1.a) ORDER BY a",
+  "source": "pg_target:subquery#185",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "subquery",
+   "exists in having"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(a INT)",
+   "INSERT INTO t1 VALUES (1),(2)",
+   "CREATE TABLE t2(k INT)",
+   "INSERT INTO t2 VALUES (1),(2)",
+   "CREATE TABLE t3(m INT)",
+   "INSERT INTO t3 VALUES (1)"
+  ],
+  "query": "SELECT a FROM t1 WHERE EXISTS (SELECT 1 FROM t2 WHERE t2.k=t1.a AND EXISTS (SELECT 1 FROM t3 WHERE t3.m=t2.k)) ORDER BY a",
+  "source": "pg_target:subquery#186",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "subquery",
+   "doubly nested exists"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE v1(a INT, b TEXT, c NUMERIC, d BOOL)",
+   "INSERT INTO v1 VALUES (1,'x',1.5,true),(2,'y',2.5,false)"
+  ],
+  "query": "SELECT v.a, v.b, v1.d FROM (VALUES (1,'x',9.9),(3,'z',0.0),(2,'y',5.5)) v(a,b,c) JOIN v1 ON v.a=v1.a AND v.b=v1.b ORDER BY v.a",
+  "source": "pg_target:values#187",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "values",
+   "values in from join"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE v1(a INT)",
+   "INSERT INTO v1 VALUES (1),(2),(3)"
+  ],
+  "query": "SELECT x.c1, x.c2, x.c3, x.c4, x.c5, v1.a FROM (VALUES (1,10,100,'p',true),(2,20,200,'q',false),(3,30,300,'r',true)) x(c1,c2,c3,c4,c5) LEFT JOIN v1 ON x.c1=v1.a ORDER BY x.c1",
+  "source": "pg_target:values#188",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "values",
+   "wide values row"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE v1(a INT)",
+   "INSERT INTO v1 VALUES (1),(2)"
+  ],
+  "query": "SELECT a FROM v1 WHERE (a, a*2) IN (VALUES (1,2),(2,4),(5,5)) ORDER BY a",
+  "source": "pg_target:values#189",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "values",
+   "row IN values"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE v1(a INT, t TEXT)",
+   "INSERT INTO v1 VALUES (1,'a'),(2,'b'),(3,'c')"
+  ],
+  "query": "SELECT u.i, v1.t FROM v1 RIGHT JOIN (VALUES (1),(2),(4)) u(i) ON v1.a=u.i ORDER BY u.i",
+  "source": "pg_target:values#190",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "values",
+   "values right join"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE e1(a INT, b INT)",
+   "INSERT INTO e1 VALUES (1,NULL),(NULL,NULL),(NULL,2),(3,3)"
+  ],
+  "query": "SELECT a, b, a IS DISTINCT FROM b AS d, a IS NOT DISTINCT FROM b AS nd FROM e1 ORDER BY a NULLS LAST, b NULLS LAST",
+  "source": "pg_target:misc#191",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "null-safe compare"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE o1(g INT, v INT)",
+   "INSERT INTO o1 VALUES (1,10),(1,20),(1,30),(2,5),(2,15)"
+  ],
+  "query": "SELECT g, percentile_cont(0.5) WITHIN GROUP (ORDER BY v), mode() WITHIN GROUP (ORDER BY v), percentile_disc(0.9) WITHIN GROUP (ORDER BY v) FROM o1 GROUP BY g ORDER BY g",
+  "source": "pg_target:misc#192",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "ordered-set aggregates"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE o1(g INT, v INT, b BOOL)",
+   "INSERT INTO o1 VALUES (1,10,true),(1,20,false),(2,5,true),(2,15,true)"
+  ],
+  "query": "SELECT g, bool_and(b), bool_or(b), every(b), bit_and(v), bit_or(v), string_agg(DISTINCT v::text, ',' ORDER BY v::text) FROM o1 GROUP BY g ORDER BY g",
+  "source": "pg_target:misc#193",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "bool bit string aggs"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(a INT, r INT4RANGE)",
+   "INSERT INTO r1 VALUES (1,'[1,5)'),(2,'[3,8)'),(3,'[10,20)'),(4,'empty')"
+  ],
+  "query": "SELECT a, r, lower(r), upper(r), isempty(r), r && int4range(4,7) AS ov FROM r1 ORDER BY a",
+  "source": "pg_target:range#194",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "range",
+   "int4range ops"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(a INT, r NUMRANGE)",
+   "INSERT INTO r1 VALUES (1,'[1.5,5.5)'),(2,'(3,8]'),(3,'[,)')"
+  ],
+  "query": "SELECT a, r, r @> 4.0 AS has4, r -|- numrange(1.5,5.5) AS adj FROM r1 ORDER BY a",
+  "source": "pg_target:range#195",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "range",
+   "numrange contains adjacent"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(a INT, m INT4MULTIRANGE)",
+   "INSERT INTO r1 VALUES (1,'{[1,5),[10,20)}'),(2,'{[3,4]}'),(3,'{}')"
+  ],
+  "query": "SELECT a, m, m @> 4 AS has4, m && int4multirange('{[4,6)}') AS ov FROM r1 ORDER BY a",
+  "source": "pg_target:range#196",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "range",
+   "multirange ops"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, s TEXT)",
+   "INSERT INTO t1 VALUES (1,'the quick brown fox'),(2,'lazy dog sleeps'),(3,'foxes and dogs')"
+  ],
+  "query": "SELECT id FROM t1 WHERE to_tsvector('english', s) @@ to_tsquery('english','fox') ORDER BY id",
+  "source": "pg_target:tsvector#197",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "tsvector",
+   "tsvector match"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE f1(a INT, b INT)",
+   "INSERT INTO f1 VALUES (1,5),(2,5),(3,5),(4,9)"
+  ],
+  "query": "SELECT a, b FROM f1 ORDER BY a FETCH FIRST 2 ROWS WITH TIES",
+  "source": "pg_target:misc#198",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "fetch with ties"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE f1(a INT)",
+   "INSERT INTO f1 VALUES (1),(2),(3),(4),(5)"
+  ],
+  "query": "SELECT a FROM f1 ORDER BY a OFFSET 1 ROWS FETCH NEXT 2 ROWS ONLY",
+  "source": "pg_target:misc#199",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "offset fetch"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(a INT, b INT, c INT)",
+   "INSERT INTO t1 VALUES (1,NULL,3),(NULL,2,NULL),(NULL,NULL,NULL),(4,5,6)"
+  ],
+  "query": "SELECT a, b, c, greatest(a,b,c), least(a,b,c), num_nonnulls(a,b,c), num_nulls(a,b,c) FROM t1 ORDER BY a NULLS LAST, b NULLS LAST",
+  "source": "pg_target:misc#200",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "greatest null semantics"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(a INT)",
+   "INSERT INTO j1 VALUES (1),(2),(3)",
+   "CREATE TABLE j2(a INT)",
+   "INSERT INTO j2 VALUES (1),(2)",
+   "CREATE TABLE j3(a INT)",
+   "INSERT INTO j3 VALUES (1),(3)",
+   "CREATE TABLE j4(a INT)",
+   "INSERT INTO j4 VALUES (1)",
+   "CREATE TABLE j5(a INT)",
+   "INSERT INTO j5 VALUES (1),(2)",
+   "CREATE TABLE j6(a INT)",
+   "INSERT INTO j6 VALUES (1)"
+  ],
+  "query": "SELECT count(*) FROM j1 JOIN j2 ON j1.a=j2.a JOIN j3 ON j2.a=j3.a JOIN j4 ON j3.a=j4.a JOIN j5 ON j4.a=j5.a JOIN j6 ON j5.a=j6.a",
+  "source": "pg_target:joins#201",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "joins",
+   "6-way star geqo"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(a INT, b INT)",
+   "INSERT INTO j1 VALUES (1,1),(2,2)",
+   "CREATE TABLE j2(a INT)",
+   "INSERT INTO j2 VALUES (1),(2)",
+   "CREATE TABLE j3(a INT)",
+   "INSERT INTO j3 VALUES (1)"
+  ],
+  "query": "SELECT j1.a FROM j1 LEFT JOIN j2 ON j1.a=j2.a RIGHT JOIN j3 ON j2.a=j3.a ORDER BY j1.a NULLS LAST",
+  "source": "pg_target:joins#202",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "joins",
+   "left right join mix"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(a INT)",
+   "INSERT INTO j1 VALUES (1),(2),(3)",
+   "CREATE TABLE j2(a INT)",
+   "INSERT INTO j2 VALUES (1),(2)"
+  ],
+  "query": "SELECT j1.a, j2.a FROM j1 JOIN j2 ON j1.a=j2.a AND EXISTS (SELECT 1 FROM j2 x WHERE x.a=j1.a) ORDER BY 1, 2",
+  "source": "pg_target:joins#203",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "joins",
+   "exists in join on"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(a INT)",
+   "INSERT INTO t1 VALUES (1),(2),(2),(3)",
+   "CREATE TABLE t2(k INT)",
+   "INSERT INTO t2 VALUES (2),(2),(3)"
+  ],
+  "query": "SELECT DISTINCT a FROM t1 WHERE a IN (SELECT k FROM t2) ORDER BY a",
+  "source": "pg_target:misc#204",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "semijoin distinct"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE big1(a INT, b INT)",
+   "INSERT INTO big1 SELECT i, i%97 FROM generate_series(1,4000) i"
+  ],
+  "query": "SELECT b, count(*), sum(a) FROM big1 GROUP BY b ORDER BY b",
+  "source": "pg_target:parallel#205",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "parallel",
+   "4k rows group agg"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE big1(a INT, b INT)",
+   "INSERT INTO big1 SELECT i, i%50 FROM generate_series(1,3000) i",
+   "CREATE TABLE big2(a INT, c INT)",
+   "INSERT INTO big2 SELECT i, i*2 FROM generate_series(1,3000) i"
+  ],
+  "query": "SELECT count(*) FROM big1 JOIN big2 ON big1.a=big2.a",
+  "source": "pg_target:parallel#206",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "parallel",
+   "3k join parallel bait"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE big1(a INT, b TEXT)",
+   "INSERT INTO big1 SELECT i, 'v'||(i%200) FROM generate_series(1,5000) i",
+   "CREATE INDEX big1_b ON big1(b)"
+  ],
+  "query": "SELECT b, count(*) FROM big1 GROUP BY b ORDER BY b",
+  "source": "pg_target:parallel#207",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "parallel",
+   "5k text group indexed"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, s TEXT, j JSONB)",
+   "INSERT INTO t1 VALUES (1,'{\"a\":1}','{\"a\":1}'),(2,'[1,2]','[1,2]'),(3,'nope','7')"
+  ],
+  "query": "SELECT id, s IS JSON, s IS JSON OBJECT, s IS JSON SCALAR, j IS JSON ARRAY FROM t1 ORDER BY id",
+  "source": "pg_target:sqljson#208",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "sqljson",
+   "is json predicates"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(k TEXT, v INT)",
+   "INSERT INTO t1 VALUES ('a',1),('b',2),('c',NULL)"
+  ],
+  "query": "SELECT JSON_OBJECTAGG(k: v) FROM t1",
+  "source": "pg_target:sqljson#209",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "sqljson",
+   "json_objectagg"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, v INT)",
+   "INSERT INTO t1 VALUES (1,5),(1,3),(2,7)"
+  ],
+  "query": "SELECT id, JSON_ARRAYAGG(v ORDER BY v) FROM t1 GROUP BY id ORDER BY id",
+  "source": "pg_target:sqljson#210",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "sqljson",
+   "json_arrayagg ordered"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(a INT, b INT)",
+   "INSERT INTO t1 VALUES (1,10),(2,20),(3,30)"
+  ],
+  "query": "SELECT a FROM t1 WHERE a IN (1,2) AND b NOT IN (10,99) OR (a,b) IN ((3,30)) ORDER BY a",
+  "source": "pg_target:misc#211",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "in-list mix"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE h1(a INT, v INT)",
+   "INSERT INTO h1 VALUES (1,5),(1,15),(2,10),(2,10)"
+  ],
+  "query": "SELECT a FROM h1 GROUP BY a HAVING count(DISTINCT v) > 1 OR sum(v) FILTER (WHERE v>10) > 10 ORDER BY a",
+  "source": "pg_target:misc#212",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "having distinct+filter"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(a INT, b INT)",
+   "INSERT INTO t1 VALUES (NULL,1),(1,NULL),(2,2),(NULL,NULL)"
+  ],
+  "query": "SELECT a, b FROM t1 ORDER BY a NULLS FIRST, b NULLS LAST",
+  "source": "pg_target:misc#213",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "nulls first last"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(a INT, b INT)",
+   "INSERT INTO t1 VALUES (1,NULL),(1,NULL),(NULL,1),(2,2)"
+  ],
+  "query": "SELECT DISTINCT a, b FROM t1 ORDER BY a NULLS LAST, b NULLS LAST",
+  "source": "pg_target:misc#214",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "distinct null dedup"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(g INT, s TEXT)",
+   "INSERT INTO t1 VALUES (1,'b'),(1,'a'),(2,'c'),(2,'a')"
+  ],
+  "query": "SELECT g, string_agg(s, ':' ORDER BY s DESC), array_agg(s ORDER BY s) FROM t1 GROUP BY g ORDER BY g",
+  "source": "pg_target:misc#215",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "ordered string array agg"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(a INT, b INT)",
+   "INSERT INTO t1 VALUES (1,2),(2,1),(3,3),(NULL,1)"
+  ],
+  "query": "SELECT a, b FROM t1 WHERE (a,b) < (2,2) OR (a,b) IS NOT NULL ORDER BY a NULLS LAST, b",
+  "source": "pg_target:misc#216",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "row-wise compare"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(a INT, b INT)",
+   "INSERT INTO t1 VALUES (1,NULL),(NULL,2)"
+  ],
+  "query": "SELECT a, b, a IS NOT NULL AND b IS NOT NULL AS both, NOT (a IS NULL OR b IS NULL) AS neg FROM t1 ORDER BY a NULLS LAST, b NULLS LAST",
+  "source": "pg_target:misc#217",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "3vl equivalence probe"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, s TEXT)",
+   "INSERT INTO t1 VALUES (1,'123x'),(2,'42'),(3,'1e5'),(4,'-7')"
+  ],
+  "query": "SELECT id, pg_input_is_valid(s,'int4'), pg_input_is_valid(s,'float8') FROM t1 ORDER BY id",
+  "source": "pg_target:misc#218",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "pg_input_is_valid"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT, b INT)",
+   "INSERT INTO s1 VALUES (1,NULL),(NULL,2)",
+   "CREATE TABLE s2(a INT, b INT)",
+   "INSERT INTO s2 VALUES (1,NULL),(NULL,2),(3,3)"
+  ],
+  "query": "SELECT u.a, u.b FROM (SELECT a,b FROM s1 INTERSECT SELECT a,b FROM s2) u ORDER BY u.a NULLS LAST, u.b NULLS LAST",
+  "source": "pg_target:misc#219",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "intersect nulls equal"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, s TEXT)",
+   "INSERT INTO t1 VALUES (1,'a.b.c'),(2,'x,y'),(3,'  pad  ')"
+  ],
+  "query": "SELECT id, string_to_array(s,'.'), array_to_string(string_to_array(s,'.'),'-'), btrim(s), lpad(s,8,'*') FROM t1 ORDER BY id",
+  "source": "pg_target:misc#220",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg_base",
+   "misc",
+   "string array fns"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, s TEXT)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":1}'),(2,'[1,2]'),(3,'\"x\"'),(4,'7'),(5,'bad'),(6,NULL),(7,'{\"a\":1,\"a\":2}')"
+  ],
+  "query": "SELECT id, s IS JSON, s IS JSON VALUE, s IS JSON SCALAR, s IS JSON OBJECT, s IS JSON ARRAY FROM j1 ORDER BY id",
+  "source": "pg_target:sqljson16#221",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "is json type keywords"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, s TEXT)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":1,\"b\":2}'),(2,'{\"a\":1,\"a\":2}'),(3,'[1,2]'),(4,'null'),(5,'{\"a\":{\"x\":1},\"a\":{\"x\":2}}'),(6,'[{\"k\":1,\"k\":1}]')"
+  ],
+  "query": "SELECT id, s IS JSON WITH UNIQUE KEYS, s IS JSON WITHOUT UNIQUE KEYS, s IS JSON OBJECT WITH UNIQUE KEYS FROM j1 ORDER BY id",
+  "source": "pg_target:sqljson16#222",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "is json unique keys recursive"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":1}'),(2,'[3]'),(3,'\"s\"'),(4,NULL),(5,'{\"a\":1,\"b\":{\"x\":1}}')"
+  ],
+  "query": "SELECT id, j IS JSON, j IS JSON OBJECT, j IS JSON ARRAY, j IS JSON SCALAR, j IS JSON WITH UNIQUE KEYS FROM j1 ORDER BY id",
+  "source": "pg_target:sqljson16#223",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "is json on jsonb col"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSON)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":1,\"a\":2}'),(2,'{\"b\":3}'),(3,'[1]'),(4,'null')"
+  ],
+  "query": "SELECT id, j IS JSON WITH UNIQUE KEYS, j::text FROM j1 ORDER BY id",
+  "source": "pg_target:sqljson16#224",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "is json on json type"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(k TEXT, v INT)",
+   "INSERT INTO j1 VALUES ('a',1),('b',NULL),('c',3),('a',9)"
+  ],
+  "query": "SELECT JSON_OBJECTAGG(k: v)::jsonb::text AS jb, JSON_OBJECTAGG(k: v)::text AS jt FROM j1",
+  "source": "pg_target:sqljson16#225",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "objectagg dup keys json vs jsonb"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(k TEXT, v INT)",
+   "INSERT INTO j1 VALUES ('a',1),('b',NULL),('c',3)"
+  ],
+  "query": "SELECT JSON_OBJECTAGG(k: v NULL ON NULL)::text AS nul, JSON_OBJECTAGG(k: v ABSENT ON NULL)::text AS abs FROM j1",
+  "source": "pg_target:sqljson16#226",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "objectagg null vs absent"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(k TEXT, v INT)",
+   "INSERT INTO j1 VALUES ('b',1),('a',2),('c',NULL)"
+  ],
+  "query": "SELECT (JSON_OBJECTAGG(k: v RETURNING jsonb))::text FROM j1",
+  "source": "pg_target:sqljson16#227",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "objectagg returning jsonb"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, v INT)",
+   "INSERT INTO j1 VALUES (1,5),(1,3),(2,NULL),(2,9)"
+  ],
+  "query": "SELECT id, JSON_ARRAYAGG(v ORDER BY v NULLS LAST) AS dflt, JSON_ARRAYAGG(v ORDER BY v NULLS LAST ABSENT ON NULL) AS abs, JSON_ARRAYAGG(v ORDER BY v NULLS LAST NULL ON NULL) AS nul FROM j1 GROUP BY id ORDER BY id",
+  "source": "pg_target:sqljson16#228",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "arrayagg null modes"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, a INT, t TEXT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,5,'x','{\"k\":1}'),(2,NULL,NULL,NULL)"
+  ],
+  "query": "SELECT id, JSON_OBJECT('a': a, 't': t, 'j': j FORMAT JSON, 'n': NULL ABSENT ON NULL)::text FROM j1 ORDER BY id",
+  "source": "pg_target:sqljson16#229",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "json_object format json + absent"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(a INT)",
+   "INSERT INTO j1 VALUES (1),(NULL),(3)"
+  ],
+  "query": "SELECT JSON_ARRAY(a, a*10, 'txt', NULL, true NULL ON NULL)::text AS nul, JSON_ARRAY(a, a*10, 'txt', NULL, true ABSENT ON NULL)::text AS abs FROM j1 ORDER BY a NULLS LAST",
+  "source": "pg_target:sqljson16#230",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "json_array list null modes"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT JSON_ARRAY(SELECT x FROM (VALUES (3),(1),(2)) v(x) ORDER BY x)::text AS arr",
+  "source": "pg_target:sqljson16#231",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "json_array query form"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(a INT)",
+   "INSERT INTO j1 VALUES (1),(2)"
+  ],
+  "query": "SELECT JSON_ARRAY(SELECT a*3 FROM j1 ORDER BY a RETURNING jsonb)::text AS arr FROM j1 ORDER BY a",
+  "source": "pg_target:sqljson16#232",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "json_array query returning jsonb"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(a INT)",
+   "INSERT INTO j1 VALUES (3),(1),(2),(1)"
+  ],
+  "query": "SELECT JSON_ARRAYAGG(a ORDER BY a RETURNING jsonb)::text AS jb, JSON_ARRAYAGG(a ORDER BY a)::text AS jt FROM j1",
+  "source": "pg_target:sqljson16#233",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "arrayagg returning types"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(k TEXT, v INT)",
+   "INSERT INTO j1 VALUES ('a',1),('b',2),('a',3)"
+  ],
+  "query": "SELECT JSON_OBJECTAGG(k: v WITHOUT UNIQUE KEYS)::text AS jt FROM j1",
+  "source": "pg_target:sqljson16#234",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "objectagg without unique keeps dups"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(g INT, a INT)",
+   "INSERT INTO j1 VALUES (1,5),(1,3),(2,7),(2,1)"
+  ],
+  "query": "SELECT g, JSON_ARRAYAGG(a ORDER BY a) FILTER (WHERE a > 2) AS f FROM j1 GROUP BY g ORDER BY g",
+  "source": "pg_target:sqljson16#235",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "arrayagg filter clause"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, s TEXT)",
+   "INSERT INTO j1 VALUES (1,'{\"k\":1}'),(2,'plain'),(3,'[1,2]')"
+  ],
+  "query": "SELECT id, JSON_OBJECT('v': s FORMAT JSON)::text AS raw, JSON_OBJECT('v': s)::text AS cooked FROM j1 ORDER BY id",
+  "source": "pg_target:sqljson16#236",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "format json raw embed"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(k TEXT, v INT)",
+   "INSERT INTO j1 VALUES ('a',1),('a',2)"
+  ],
+  "query": "SELECT JSON_OBJECTAGG(k: v WITH UNIQUE KEYS) FROM j1",
+  "source": "pg_target:sqljson16#237",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "objectagg unique keys error"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(g INT, r INT4RANGE)",
+   "INSERT INTO r1 VALUES (1,'[1,5)'),(1,'[3,8)'),(1,'empty'),(2,'[10,20)'),(3,NULL)"
+  ],
+  "query": "SELECT g, range_agg(r)::text FROM r1 GROUP BY g ORDER BY g",
+  "source": "pg_target:multirange#238",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "range_agg"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(g INT, r INT4RANGE)",
+   "INSERT INTO r1 VALUES (1,'[1,5)'),(1,'[8,12)'),(2,'[10,20)'),(2,'[15,25)')"
+  ],
+  "query": "SELECT g, range_intersect_agg(r)::text FROM r1 GROUP BY g ORDER BY g",
+  "source": "pg_target:multirange#239",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "range_intersect_agg pg16"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, m INT4MULTIRANGE)",
+   "INSERT INTO r1 VALUES (1,'{[1,5),[10,20)}'),(2,'{[3,4]}'),(3,'{}'),(4,NULL)"
+  ],
+  "query": "SELECT id, u.r::text AS r, lower(u.r), upper(u.r) FROM r1 LEFT JOIN LATERAL unnest(m) u(r) ON true ORDER BY id, u.r NULLS LAST",
+  "source": "pg_target:multirange#240",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "unnest multirange pg15"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, a INT4MULTIRANGE, b INT4MULTIRANGE)",
+   "INSERT INTO r1 VALUES (1,'{[1,5),[7,9)}','{[2,8)}'),(2,'{[1,3)}','{[5,6)}'),(3,'{}','{[1,9)}')"
+  ],
+  "query": "SELECT id, (a + b)::text AS uni, (a - b)::text AS dif, (a * b)::text AS isect FROM r1 ORDER BY id",
+  "source": "pg_target:multirange#241",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "multirange arith"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, m INT4MULTIRANGE)",
+   "INSERT INTO r1 VALUES (1,'{[1,3),[2,5),[4,6)}'),(2,'{[10,10)}'),(3,'{[5,5]}'),(4,'{[1,1),(1,1]}')"
+  ],
+  "query": "SELECT id, m::text, m = '{[1,6)}'::int4multirange AS eq16, isempty(m) FROM r1 ORDER BY id",
+  "source": "pg_target:multirange#242",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "multirange canonicalization"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, m NUMMULTIRANGE)",
+   "INSERT INTO r1 VALUES (1,'{[1.5,5.5),[10,)}'),(2,'{(,0]}'),(3,'{}')"
+  ],
+  "query": "SELECT id, lower(m), upper(m), lower_inf(m), upper_inf(m), m @> 4.5 AS has45 FROM r1 ORDER BY id",
+  "source": "pg_target:multirange#243",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "nummultirange infinities"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, m TSTZMULTIRANGE)",
+   "INSERT INTO r1 VALUES (1,'{[2024-01-01,2024-01-10),[2024-02-01,2024-02-05)}'),(2,'{}')"
+  ],
+  "query": "SELECT id, m @> timestamptz '2024-01-05' AS jan5, m @> timestamptz '2024-01-15' AS jan15, (m -|- tstzmultirange('{[2024-01-09,2024-01-30)}')) AS adj FROM r1 ORDER BY id",
+  "source": "pg_target:multirange#244",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "tstzmultirange contains adjacent"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, m INT4MULTIRANGE)",
+   "INSERT INTO r1 VALUES (1,'{[1,5),[10,20)}'),(2,'{[3,4]}'),(3,'{}')"
+  ],
+  "query": "SELECT id, range_agg(u.r)::text = m::text AS roundtrip, range_agg(u.r)::text AS agg FROM r1 LEFT JOIN LATERAL unnest(m) u(r) ON true GROUP BY id, m ORDER BY id",
+  "source": "pg_target:multirange#245",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "unnest range_agg roundtrip"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, r INT4RANGE)",
+   "INSERT INTO r1 VALUES (1,'[1,5)'),(2,'[3,8)'),(3,'[10,20)'),(4,'empty')"
+  ],
+  "query": "SELECT id, r::int4multirange::text AS mr, r -|- int4range(5,10) AS adj, r << int4range(10,20) AS before, int4range(0,1) >> r AS after FROM r1 ORDER BY id",
+  "source": "pg_target:multirange#246",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "range cast + position ops"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mt(k INT PRIMARY KEY, v INT)",
+   "INSERT INTO mt VALUES (1,10),(2,20)",
+   "CREATE TABLE ms(k INT, w INT)",
+   "INSERT INTO ms VALUES (1,99),(3,30),(4,NULL)",
+   "MERGE INTO mt USING ms ON mt.k=ms.k WHEN MATCHED THEN UPDATE SET v=ms.w WHEN NOT MATCHED THEN INSERT VALUES (ms.k, ms.w)"
+  ],
+  "query": "SELECT k, v FROM mt ORDER BY k",
+  "source": "pg_target:merge#247",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "merge",
+   "merge basic"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mt(k INT PRIMARY KEY, v INT)",
+   "INSERT INTO mt VALUES (1,10),(2,20),(5,50)",
+   "MERGE INTO mt USING (SELECT k, w*10 AS w FROM (VALUES (1,9),(2,1),(5,9),(7,3)) s(k,w)) q ON mt.k=q.k WHEN MATCHED AND mt.v < q.w THEN UPDATE SET v=q.w WHEN MATCHED THEN DELETE WHEN NOT MATCHED THEN INSERT VALUES (q.k,q.w)"
+  ],
+  "query": "SELECT k, v FROM mt ORDER BY k",
+  "source": "pg_target:merge#248",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "merge",
+   "merge conditional clauses"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mt(k INT PRIMARY KEY, v INT)",
+   "INSERT INTO mt VALUES (1,10),(2,20)",
+   "MERGE INTO mt USING (WITH w AS (SELECT 1 AS k, 77 AS v UNION ALL SELECT 9, 88) SELECT * FROM w) s ON mt.k=s.k WHEN MATCHED THEN UPDATE SET v=s.v WHEN NOT MATCHED THEN INSERT VALUES (s.k, s.v)"
+  ],
+  "query": "SELECT k, v FROM mt ORDER BY k",
+  "source": "pg_target:merge#249",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "merge",
+   "merge cte inside using"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mp(k INT, v INT) PARTITION BY RANGE (k)",
+   "CREATE TABLE mp0 PARTITION OF mp FOR VALUES FROM (0) TO (50)",
+   "CREATE TABLE mp1 PARTITION OF mp FOR VALUES FROM (50) TO (200)",
+   "INSERT INTO mp VALUES (10,1),(60,2)",
+   "MERGE INTO mp USING (VALUES (10,70),(60,5)) s(k,nk) ON mp.k=s.k WHEN MATCHED AND s.nk >= 50 THEN UPDATE SET k=s.nk WHEN MATCHED THEN UPDATE SET v=v*100"
+  ],
+  "query": "SELECT k, v FROM mp ORDER BY k",
+  "source": "pg_target:merge#250",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "merge",
+   "merge partition row movement"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mt(k INT PRIMARY KEY, v INT)",
+   "INSERT INTO mt VALUES (1,1),(4,4)",
+   "CREATE FUNCTION mf() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN NEW.v := NEW.v + 1; RETURN NEW; END $$",
+   "CREATE TRIGGER mtrg BEFORE INSERT OR UPDATE ON mt FOR EACH ROW EXECUTE FUNCTION mf()",
+   "CREATE TABLE ms(k INT, w INT)",
+   "INSERT INTO ms VALUES (1,10),(2,20)",
+   "MERGE INTO mt USING ms ON mt.k=ms.k WHEN MATCHED THEN UPDATE SET v=ms.w WHEN NOT MATCHED THEN INSERT VALUES (ms.k,ms.w)"
+  ],
+  "query": "SELECT k, v FROM mt ORDER BY k",
+  "source": "pg_target:merge#251",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "merge",
+   "merge with before trigger"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mt(k INT PRIMARY KEY, v INT)",
+   "INSERT INTO mt VALUES (1,10),(2,20),(3,30)",
+   "MERGE INTO mt t USING mt s ON t.k = s.k + 1 WHEN MATCHED THEN UPDATE SET v = s.v + 1"
+  ],
+  "query": "SELECT k, v FROM mt ORDER BY k",
+  "source": "pg_target:merge#252",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "merge",
+   "merge self join"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mt(k INT PRIMARY KEY, v INT, g INT GENERATED ALWAYS AS (v*10) STORED)",
+   "INSERT INTO mt(k,v) VALUES (1,10)",
+   "MERGE INTO mt USING (VALUES (1),(5)) s(k) ON mt.k=s.k WHEN MATCHED THEN UPDATE SET v=v+5 WHEN NOT MATCHED THEN INSERT (k,v) VALUES (s.k, DEFAULT)"
+  ],
+  "query": "SELECT k, v, g FROM mt ORDER BY k",
+  "source": "pg_target:merge#253",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "merge",
+   "merge generated col + DEFAULT"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mt(k INT PRIMARY KEY, v INT)",
+   "INSERT INTO mt VALUES (1,10),(2,20)",
+   "CREATE TABLE ms(k INT, w INT)",
+   "INSERT INTO ms VALUES (1,1),(1,2)"
+  ],
+  "query": "MERGE INTO mt USING ms ON mt.k=ms.k WHEN MATCHED THEN UPDATE SET v=ms.w",
+  "source": "pg_target:merge#254",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "merge",
+   "merge second-touch error path"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mt(k INT, v INT)",
+   "INSERT INTO mt VALUES (1,1)",
+   "CREATE RULE mru AS ON INSERT TO mt DO INSTEAD NOTHING"
+  ],
+  "query": "MERGE INTO mt USING (VALUES (2,2)) s(k,v) ON mt.k=s.k WHEN NOT MATCHED THEN INSERT VALUES (s.k,s.v)",
+  "source": "pg_target:merge#255",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "merge",
+   "merge on rule table error"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mt(k INT PRIMARY KEY, v INT)",
+   "INSERT INTO mt VALUES (1,10),(9,90)",
+   "CREATE TABLE ms(k INT)",
+   "INSERT INTO ms VALUES (1)"
+  ],
+  "query": "MERGE INTO mt USING ms ON mt.k=ms.k WHEN NOT MATCHED BY SOURCE THEN DELETE",
+  "source": "pg_target:merge#256",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "merge",
+   "merge not matched by source pg17"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT, b INT, c INT)",
+   "INSERT INTO s1 SELECT i%50, (i*7)%200, i FROM generate_series(1,4000) i",
+   "CREATE INDEX s1_a ON s1(a)",
+   "ANALYZE s1"
+  ],
+  "query": "SELECT a, b, count(*), sum(c) FROM s1 WHERE a < 20 GROUP BY a, b ORDER BY a, b",
+  "source": "pg_target:incsort#257",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "incsort",
+   "presorted prefix group"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT, b INT)",
+   "INSERT INTO s1 SELECT i%30, i FROM generate_series(1,3000) i",
+   "CREATE INDEX s1_a ON s1(a)",
+   "ANALYZE s1"
+  ],
+  "query": "SELECT a, b FROM s1 WHERE a BETWEEN 5 AND 25 ORDER BY a, b",
+  "source": "pg_target:incsort#258",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "incsort",
+   "partial sort extra key"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT, b INT, c INT)",
+   "INSERT INTO s1 SELECT i%10, i%40, i FROM generate_series(1,3000) i",
+   "CREATE INDEX s1_ab ON s1(a,b)",
+   "ANALYZE s1"
+  ],
+  "query": "SELECT a, b, c FROM s1 WHERE a < 5 ORDER BY a, b, c",
+  "source": "pg_target:incsort#259",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "incsort",
+   "two-key prefix third key"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE out1(k INT)",
+   "INSERT INTO out1 SELECT i%20 FROM generate_series(1,4000) i",
+   "CREATE TABLE in1(k INT, v INT)",
+   "INSERT INTO in1 SELECT i, i*11 FROM generate_series(1,2000) i",
+   "CREATE INDEX in1_k ON in1(k)",
+   "ANALYZE out1",
+   "ANALYZE in1"
+  ],
+  "query": "SELECT o.k, count(*) AS c FROM out1 o JOIN in1 ON in1.k=o.k GROUP BY o.k ORDER BY o.k",
+  "source": "pg_target:memoize#260",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "memoize",
+   "repeated lookup keys"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE out1(k INT)",
+   "INSERT INTO out1 SELECT i%25 FROM generate_series(1,2000) i",
+   "CREATE TABLE in1(k INT, v INT)",
+   "INSERT INTO in1 SELECT i, i*7 FROM generate_series(1,1500) i",
+   "CREATE INDEX in1_k ON in1(k)",
+   "ANALYZE out1",
+   "ANALYZE in1"
+  ],
+  "query": "SELECT o.k, (SELECT count(*) FROM in1 WHERE in1.k=o.k) AS c FROM out1 o GROUP BY o.k ORDER BY o.k",
+  "source": "pg_target:memoize#261",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "memoize",
+   "correlated repeat params"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT, b INT)",
+   "INSERT INTO s1 SELECT i, i*3 % 500 FROM generate_series(1,20000) i"
+  ],
+  "query": "SELECT a, b FROM s1 ORDER BY a DESC, b",
+  "source": "pg_target:workmem#262",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "workmem",
+   "big sort spillable"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT, b INT)",
+   "INSERT INTO s1 SELECT i%4000, i FROM generate_series(1,20000) i"
+  ],
+  "query": "SELECT a, count(*), sum(b) FROM s1 GROUP BY a ORDER BY a",
+  "source": "pg_target:workmem#263",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "workmem",
+   "big groupby spill"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT, b INT)",
+   "INSERT INTO s1 SELECT i%3000, i*5 FROM generate_series(1,18000) i"
+  ],
+  "query": "SELECT DISTINCT a, b%3 FROM s1 ORDER BY a, 2",
+  "source": "pg_target:workmem#264",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "workmem",
+   "big distinct spill"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE DOMAIN darr AS INT[] CHECK (VALUE IS NULL OR cardinality(VALUE) <= 3)",
+   "CREATE TABLE d1(id INT, a darr)",
+   "INSERT INTO d1 VALUES (1,'{1,2,3}'),(2,'{}'),(3,NULL)"
+  ],
+  "query": "SELECT id, a, cardinality(a) FROM d1 ORDER BY id",
+  "source": "pg_target:domain16#265",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "domain16",
+   "domain over array"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TYPE pt AS (x INT, y INT)",
+   "CREATE DOMAIN dpt AS pt CHECK ((VALUE).x <= (VALUE).y)",
+   "CREATE TABLE d1(id INT, p dpt)",
+   "INSERT INTO d1 VALUES (1,ROW(1,2)::pt),(2,ROW(5,5)::pt)"
+  ],
+  "query": "SELECT id, (p).x, (p).y, p = ROW(1,2)::dpt AS eq FROM d1 ORDER BY id",
+  "source": "pg_target:domain16#266",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "domain16",
+   "domain over composite"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE DOMAIN dpos AS INT CHECK (VALUE > 0)",
+   "CREATE DOMAIN dpos2 AS dpos CHECK (VALUE < 100)",
+   "CREATE TABLE d1(a dpos2)",
+   "INSERT INTO d1 VALUES (5),(50),(99)"
+  ],
+  "query": "SELECT a, a::int AS bi, a + 1 AS p1 FROM d1 ORDER BY a",
+  "source": "pg_target:domain16#267",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "domain16",
+   "stacked domains"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE DOMAIN dpos AS INT CHECK (VALUE > 0)",
+   "CREATE TABLE d1(id INT, a dpos[])",
+   "INSERT INTO d1 VALUES (1,'{1,2,3}'),(2,'{}'),(3,NULL)"
+  ],
+  "query": "SELECT id, u.e FROM d1 LEFT JOIN LATERAL unnest(a) u(e) ON true ORDER BY id, u.e NULLS LAST",
+  "source": "pg_target:domain16#268",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "domain16",
+   "array of domain unnest"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE DOMAIN dtxt AS TEXT CHECK (VALUE ~ '^[a-z]+$')",
+   "CREATE TABLE d1(id INT, s dtxt)",
+   "INSERT INTO d1 VALUES (1,'abc'),(2,'xyz')",
+   "CREATE INDEX d1_s ON d1(s)"
+  ],
+  "query": "SELECT id, s FROM d1 WHERE s LIKE 'a%' OR s = 'xyz' ORDER BY id",
+  "source": "pg_target:domain16#269",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "domain16",
+   "domain text + index probe"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE DOMAIN dpos AS INT CHECK (VALUE > 0)",
+   "CREATE TABLE g1(a INT, b dpos GENERATED ALWAYS AS (a*2) STORED)",
+   "INSERT INTO g1(a) VALUES (1),(2),(5)",
+   "CREATE INDEX g1_b ON g1(b)"
+  ],
+  "query": "SELECT a, b FROM g1 WHERE b > 3 ORDER BY a",
+  "source": "pg_target:genexpr#270",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "genexpr",
+   "generated domain col index"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE DOMAIN dpos AS INT CHECK (VALUE > 0)",
+   "CREATE TABLE g1(a INT, b dpos GENERATED ALWAYS AS (a*2) STORED)",
+   "INSERT INTO g1(a) VALUES (1),(0)"
+  ],
+  "query": "SELECT a, b FROM g1 ORDER BY a",
+  "source": "pg_target:genexpr#271",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "genexpr",
+   "generated domain check fires"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT, b INT)",
+   "INSERT INTO g1 VALUES (1,10),(2,20),(3,30)",
+   "CREATE INDEX g1_ab ON g1((a+b))"
+  ],
+  "query": "SELECT a, b FROM g1 WHERE a+b = 30 OR a+b = 12 ORDER BY a",
+  "source": "pg_target:genexpr#272",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "genexpr",
+   "expression index match"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT, b INT GENERATED ALWAYS AS (a % 4) STORED)",
+   "INSERT INTO g1(a) SELECT i FROM generate_series(1,20) i",
+   "CREATE INDEX g1_pb ON g1(b) WHERE b = 0"
+  ],
+  "query": "SELECT a, b FROM g1 WHERE b = 0 ORDER BY a",
+  "source": "pg_target:genexpr#273",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "genexpr",
+   "partial index on generated"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(id INT PRIMARY KEY, a INT, b INT GENERATED ALWAYS AS (a*2) STORED, UNIQUE(a,b))",
+   "INSERT INTO g1(id,a) VALUES (1,5),(2,10)",
+   "INSERT INTO g1(id,a) VALUES (3,5) ON CONFLICT (a,b) DO NOTHING"
+  ],
+  "query": "SELECT id, a, b FROM g1 ORDER BY id",
+  "source": "pg_target:genexpr#274",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "genexpr",
+   "upsert hits generated unique"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE p1(a INT, b INT) PARTITION BY RANGE (a)",
+   "CREATE TABLE p1_0 PARTITION OF p1 FOR VALUES FROM (0) TO (500)",
+   "CREATE TABLE p1_1 PARTITION OF p1 FOR VALUES FROM (500) TO (1000)",
+   "INSERT INTO p1 SELECT i, i*3 FROM generate_series(1,900) i",
+   "CREATE TABLE d1(k INT, w INT)",
+   "INSERT INTO d1 SELECT i, i*2 FROM generate_series(1,50) i",
+   "ANALYZE p1",
+   "ANALYZE d1"
+  ],
+  "query": "SELECT a, b, (SELECT w FROM d1 WHERE d1.k = p1.a % 50) AS w FROM p1 WHERE a % 200 < 20 ORDER BY a",
+  "source": "pg_target:par16#275",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "par16",
+   "corr subq on partitioned"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE big1(a INT, s TEXT)",
+   "INSERT INTO big1 SELECT i, 'v'||(i%100) FROM generate_series(1,20000) i",
+   "ANALYZE big1"
+  ],
+  "query": "SELECT s, count(*), string_agg(a::text, ',' ORDER BY a DESC), array_agg(a ORDER BY a) FROM big1 GROUP BY s ORDER BY s",
+  "source": "pg_target:par16#276",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "par16",
+   "parallel string/array agg pg16"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE l1(a INT)",
+   "INSERT INTO l1 SELECT i FROM generate_series(1,4000) i",
+   "CREATE TABLE r1(a INT)",
+   "INSERT INTO r1 SELECT i FROM generate_series(1000,5000) i",
+   "CREATE INDEX r1_a ON r1(a)",
+   "ANALYZE l1",
+   "ANALYZE r1"
+  ],
+  "query": "SELECT count(*) FROM l1 FULL JOIN r1 ON l1.a=r1.a WHERE l1.a IS NULL OR r1.a IS NULL",
+  "source": "pg_target:par16#277",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "par16",
+   "parallel full join pg16"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE big1(a INT, b INT)",
+   "INSERT INTO big1 SELECT i, i%50 FROM generate_series(1,30000) i",
+   "CREATE TABLE big2(a INT, c INT)",
+   "INSERT INTO big2 SELECT i, i*2 FROM generate_series(1,15000) i",
+   "CREATE INDEX big2_a ON big2(a)",
+   "ANALYZE big1",
+   "ANALYZE big2"
+  ],
+  "query": "SELECT b, count(*) FROM big1 WHERE EXISTS (SELECT 1 FROM big2 WHERE big2.a = big1.a) GROUP BY b ORDER BY b",
+  "source": "pg_target:par16#278",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "par16",
+   "parallel semijoin exists"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE big1(a INT, v NUMERIC)",
+   "INSERT INTO big1 SELECT i, (i*1.5)::numeric FROM generate_series(1,25000) i",
+   "ANALYZE big1"
+  ],
+  "query": "SELECT a%17 AS g, sum(v), avg(v), count(DISTINCT a%997) FROM big1 GROUP BY 1 ORDER BY 1",
+  "source": "pg_target:par16#279",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "par16",
+   "parallel agg + distinct"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":{\"b\":[1,2,3]}}'),(2,'{\"a\":{\"b\":[4]}}'),(3,'{}'),(4,NULL)"
+  ],
+  "query": "SELECT id, j['a'], j['a']['b'][0], j['missing'] FROM j1 ORDER BY id",
+  "source": "pg_target:jsonb_ops#280",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonb subscript pg14"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":{\"b\":1}}'),(2,'{\"a\":2}')",
+   "UPDATE j1 SET j['a']['b'] = '9'::jsonb WHERE id=1",
+   "UPDATE j1 SET j['x']['y'] = '7'::jsonb WHERE id=2"
+  ],
+  "query": "SELECT id, j::text FROM j1 ORDER BY id",
+  "source": "pg_target:jsonb_ops#281",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonb nested subscript update"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":1,\"b\":2}'),(2,'[1,2]'),(3,'\"s\"'),(4,'[3]'),(5,'5')"
+  ],
+  "query": "SELECT id, (j || '5'::jsonb)::text AS js, (j || '[9]'::jsonb)::text AS ja, ('8'::jsonb || j)::text AS pre, (j || '{\"z\":1}'::jsonb)::text AS jo FROM j1 ORDER BY id",
+  "source": "pg_target:jsonb_ops#282",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonb concat type matrix"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":1,\"b\":{\"c\":2}}'),(2,'[1,2,3]'),(3,'{\"a\":{\"b\":{\"c\":9}}}')"
+  ],
+  "query": "SELECT id, (j - 'a')::text AS dma, (j - 'b')::text AS dmb, (j - 1)::text AS di1, (j #- '{a,b,c}')::text AS dpc, (j #- '{b,c}')::text AS dpb FROM j1 ORDER BY id",
+  "source": "pg_target:jsonb_ops#283",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonb delete ops matrix"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'[1,2,3,4]'),(2,'{\"a\":10,\"b\":20}'),(3,'{\"a\":{\"x\":[5,6]}}')"
+  ],
+  "query": "SELECT id, q::text FROM j1, LATERAL jsonb_path_query(j, '$[*] ? (@ > $lim)', jsonb_build_object('lim',2), true) q ORDER BY id, q::text",
+  "source": "pg_target:jsonb_ops#284",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonpath vars passing"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'[\"apple\",\"banana\",\"avocado\"]'),(2,'{\"k1\":\"cat\",\"k2\":\"cut\"}')"
+  ],
+  "query": "SELECT id, q::text FROM j1, LATERAL jsonb_path_query(j, '$[*] ? (@ like_regex \"^a\")', silent => true) q ORDER BY id, q::text",
+  "source": "pg_target:jsonb_ops#285",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonpath like_regex"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":{\"b\":{\"c\":42}}}'),(2,'{\"x\":{\"c\":7}}'),(3,'{\"c\":1}')"
+  ],
+  "query": "SELECT id, q::text FROM j1, LATERAL jsonb_path_query(j, '$.**.c ? (@ > 1)') q ORDER BY id, q::text",
+  "source": "pg_target:jsonb_ops#286",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonpath recursive descent"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'[1,4,9,16]'),(2,'[\"-3\",2.25]'),(3,'[]')"
+  ],
+  "query": "SELECT id, q::text FROM j1, LATERAL jsonb_path_query(j, '$[*].double() ? (@ > 2)') q ORDER BY id, q::text",
+  "source": "pg_target:jsonb_ops#287",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonpath double method"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"d\":\"2024-01-05\"}'),(2,'{\"d\":\"2024-06-01\"}'),(3,'{\"d\":\"notadate\"}')"
+  ],
+  "query": "SELECT id, q::text FROM j1, LATERAL jsonb_path_query(j, '$.d.datetime() ? (@ > \"2024-03-01\".datetime())', silent => true) q ORDER BY id, q::text",
+  "source": "pg_target:jsonb_ops#288",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonpath datetime"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":5}'),(2,'[1,2]'),(3,'\"s\"')"
+  ],
+  "query": "SELECT id, jsonb_path_query(j, 'strict $.a') FROM j1 ORDER BY id",
+  "source": "pg_target:jsonb_ops#289",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonpath strict error"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":[10,20,30]}'),(2,'{\"a\":5}'),(3,'{}')"
+  ],
+  "query": "SELECT id, jsonb_path_query_first(j, '$.a[*] ? (@ >= 20)')::text AS f1, jsonb_path_query_first(j, '$.a')::text AS f2 FROM j1 ORDER BY id",
+  "source": "pg_target:jsonb_ops#290",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonb_path_query_first"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 0xFF AS h, 0b1010 AS b, 0o17 AS o, 1_000_000 AS u, 0x1F + 0b1 AS mix, 2_5.5 AS f, 1e1_0 AS e",
+  "source": "pg_target:numlit16#291",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "numlit16",
+   "non-decimal + underscore literals"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE n1(a INT)",
+   "INSERT INTO n1 VALUES (0x10),(0b11),(0o20),(1_000)"
+  ],
+  "query": "SELECT a, a = 16 AS eq16, a & 0x0F AS band, a | 0b100 AS bor FROM n1 ORDER BY a",
+  "source": "pg_target:numlit16#292",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "numlit16",
+   "literal insert bitops"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE n1(a NUMERIC, b BIGINT)",
+   "INSERT INTO n1 VALUES (1_000.5, 0x7FFF_FFFF_FFFF_FFFF),(2_5e1, -0b1_000)"
+  ],
+  "query": "SELECT a, b, a + 0.5 AS a2, -b AS nb FROM n1 ORDER BY a",
+  "source": "pg_target:numlit16#293",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "numlit16",
+   "underscore numeric bigint"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE nd(a INT, b TEXT)",
+   "CREATE UNIQUE INDEX ndu ON nd(a) NULLS NOT DISTINCT",
+   "INSERT INTO nd VALUES (NULL,'x'),(1,'p')",
+   "INSERT INTO nd VALUES (NULL,'y'),(2,'q') ON CONFLICT (a) DO UPDATE SET b = 'u'"
+  ],
+  "query": "SELECT a, b FROM nd ORDER BY a NULLS FIRST",
+  "source": "pg_target:pg1516#294",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "nulls not distinct upsert"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE nd(a INT, b TEXT)",
+   "CREATE UNIQUE INDEX ndu ON nd(a)",
+   "INSERT INTO nd VALUES (NULL,'x'),(NULL,'x2'),(1,'p')"
+  ],
+  "query": "SELECT count(*) AS nulls, count(DISTINCT b) AS nb FROM nd",
+  "source": "pg_target:pg1516#295",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "nulls distinct default"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT gcd(12,18) AS g1, gcd(0,7) AS g2, lcm(4,6) AS l1, lcm(0,5) AS l2, scale(1.2340::numeric) AS sc, min_scale(1.2300::numeric) AS ms, trim_scale(1.2300::numeric) AS ts",
+  "source": "pg_target:pg1516#296",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "gcd lcm scale pg15"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE i1(d DATE)",
+   "INSERT INTO i1 VALUES ('2024-01-15'),('2024-03-20')"
+  ],
+  "query": "SELECT d, d + interval '1.5 months' AS m15, d + interval '0.25 years' AS y25, interval '2.5 hours' AS h FROM i1 ORDER BY d",
+  "source": "pg_target:pg1516#297",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "interval fractions pg16"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(s TEXT)",
+   "INSERT INTO t1 VALUES ('abc123def'),('x9'),('no-digits')"
+  ],
+  "query": "SELECT s, substring(s FROM '([a-z]+)([0-9]+)' FOR '#') AS sub, substring(s FROM '[0-9]+') AS num FROM t1 ORDER BY s",
+  "source": "pg_target:pg1516#298",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "substring for escape pg14"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, s TEXT)",
+   "INSERT INTO t1 VALUES (1,'123x'),(2,'42'),(3,'1e5'),(4,'abc')"
+  ],
+  "query": "SELECT id, (pg_input_error_info(s,'int4')).* FROM t1 ORDER BY id",
+  "source": "pg_target:pg1516#299",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "pg_input_error_info pg16"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(g INT, s TEXT)",
+   "INSERT INTO t1 VALUES (1,'b'),(1,'a'),(1,'a'),(2,'c'),(2,'a')"
+  ],
+  "query": "SELECT g, string_agg(DISTINCT s, ',' ORDER BY s), count(DISTINCT s) FROM t1 GROUP BY g ORDER BY g",
+  "source": "pg_target:pg1516#300",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "distinct agg order by pg16"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(g INT, v INT)",
+   "INSERT INTO t1 VALUES (1,5),(1,5),(2,9),(3,NULL),(3,NULL)"
+  ],
+  "query": "SELECT g, any_value(v) FROM t1 GROUP BY g ORDER BY g",
+  "source": "pg_target:pg1516#301",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "any_value pg16"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, s TEXT)",
+   "INSERT INTO t1 VALUES (1,'abc'),(2,'a' || U&'0308'),(3,'x%y')"
+  ],
+  "query": "SELECT id, s IS NORMALIZED, s IS NFC NORMALIZED, s IS NFKC NORMALIZED FROM t1 ORDER BY id",
+  "source": "pg_target:pg1516#302",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "is normalized predicate"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(t TIMESTAMPTZ)",
+   "INSERT INTO t1 VALUES ('2024-03-10 15:04:05+05:30'),('2024-12-25 00:00:00-08:00')"
+  ],
+  "query": "SELECT to_char(t, 'YYYY-MM-DD HH24:MI OF TZH:TZM'), to_char(t, 'Dy Mon DD YYYY') FROM t1 ORDER BY t",
+  "source": "pg_target:pg1516#303",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "to_char OF TZH TZM pg16"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, s TEXT CHECK (s IS JSON OBJECT))",
+   "INSERT INTO t1 VALUES (1,'{\"a\":1}'),(2,'{}')"
+  ],
+  "query": "SELECT id, s FROM t1 ORDER BY id",
+  "source": "pg_target:pg1516#304",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "is json in check constraint"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE DOMAIN dn AS INT",
+   "CREATE TABLE d1(a dn)",
+   "INSERT INTO d1 VALUES (-5),(3)",
+   "ALTER DOMAIN dn ADD CONSTRAINT dnc CHECK (VALUE > 0)"
+  ],
+  "query": "SELECT a FROM d1 ORDER BY a",
+  "source": "pg_target:pg1516#305",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "alter domain retro check error"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, m INT4MULTIRANGE)",
+   "INSERT INTO r1 VALUES (1,'{[1,3),[7,9)}'),(2,'{}'),(3,NULL)"
+  ],
+  "query": "SELECT id, u.r::text, u.n FROM r1 LEFT JOIN LATERAL unnest(m) WITH ORDINALITY u(r,n) ON true ORDER BY id, u.n NULLS LAST",
+  "source": "pg_target:multirange#306",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "unnest multirange ordinality"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, x INT4RANGE)",
+   "INSERT INTO r1 VALUES (1,'[1,3)'),(1,'empty'),(2,'[5,9)'),(2,'[7,10)')"
+  ],
+  "query": "SELECT id, range_intersect_agg(x) OVER (PARTITION BY id)::text AS ri, range_agg(x) OVER (PARTITION BY id)::text AS ra FROM r1 ORDER BY id, x::text",
+  "source": "pg_target:multirange#307",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "range aggs as window fns"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(s TEXT)",
+   "INSERT INTO t1 VALUES ('a-b-c'),('xy'),('')"
+  ],
+  "query": "SELECT s, st.v, st.n FROM t1, LATERAL string_to_table(s, '-') WITH ORDINALITY st(v,n) ORDER BY s, st.n",
+  "source": "pg_target:misc#308",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "misc",
+   "string_to_table pg14"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT, b INT, c INT)",
+   "INSERT INTO s1 SELECT i%40, i, i%97 FROM generate_series(1,3000) i",
+   "CREATE INDEX s1_a ON s1(a)",
+   "ANALYZE s1"
+  ],
+  "query": "SELECT a, c, row_number() OVER (ORDER BY a, c) rn FROM s1 WHERE a<3 ORDER BY a, c",
+  "source": "pg_target:incsort#309",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "incsort",
+   "window fed by presorted prefix"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, s TEXT)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":1}'),(2,'[1,2]'),(3,'\"x\"'),(4,'7'),(5,'bad'),(6,NULL),(7,'{\"a\":1,\"a\":2}')"
+  ],
+  "query": "SELECT id, s IS JSON, s IS JSON VALUE, s IS JSON SCALAR, s IS JSON OBJECT, s IS JSON ARRAY FROM j1 ORDER BY id",
+  "source": "pg_target:sqljson16#221",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "is json type keywords"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, s TEXT)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":1,\"b\":2}'),(2,'{\"a\":1,\"a\":2}'),(3,'[1,2]'),(4,'null'),(5,'{\"a\":{\"x\":1},\"a\":{\"x\":2}}'),(6,'[{\"k\":1,\"k\":1}]')"
+  ],
+  "query": "SELECT id, s IS JSON WITH UNIQUE KEYS, s IS JSON WITHOUT UNIQUE KEYS, s IS JSON OBJECT WITH UNIQUE KEYS FROM j1 ORDER BY id",
+  "source": "pg_target:sqljson16#222",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "is json unique keys recursive"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":1}'),(2,'[3]'),(3,'\"s\"'),(4,NULL),(5,'{\"a\":1,\"b\":{\"x\":1}}')"
+  ],
+  "query": "SELECT id, j IS JSON, j IS JSON OBJECT, j IS JSON ARRAY, j IS JSON SCALAR, j IS JSON WITH UNIQUE KEYS FROM j1 ORDER BY id",
+  "source": "pg_target:sqljson16#223",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "is json on jsonb col"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSON)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":1,\"a\":2}'),(2,'{\"b\":3}'),(3,'[1]'),(4,'null')"
+  ],
+  "query": "SELECT id, j IS JSON WITH UNIQUE KEYS, j::text FROM j1 ORDER BY id",
+  "source": "pg_target:sqljson16#224",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "is json on json type"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(k TEXT, v INT)",
+   "INSERT INTO j1 VALUES ('a',1),('b',NULL),('c',3),('a',9)"
+  ],
+  "query": "SELECT JSON_OBJECTAGG(k: v)::jsonb::text AS jb, JSON_OBJECTAGG(k: v)::text AS jt FROM j1",
+  "source": "pg_target:sqljson16#225",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "objectagg dup keys json vs jsonb"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(k TEXT, v INT)",
+   "INSERT INTO j1 VALUES ('a',1),('b',NULL),('c',3)"
+  ],
+  "query": "SELECT JSON_OBJECTAGG(k: v NULL ON NULL)::text AS nul, JSON_OBJECTAGG(k: v ABSENT ON NULL)::text AS abs FROM j1",
+  "source": "pg_target:sqljson16#226",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "objectagg null vs absent"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(k TEXT, v INT)",
+   "INSERT INTO j1 VALUES ('b',1),('a',2),('c',NULL)"
+  ],
+  "query": "SELECT (JSON_OBJECTAGG(k: v RETURNING jsonb))::text FROM j1",
+  "source": "pg_target:sqljson16#227",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "objectagg returning jsonb"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, v INT)",
+   "INSERT INTO j1 VALUES (1,5),(1,3),(2,NULL),(2,9)"
+  ],
+  "query": "SELECT id, JSON_ARRAYAGG(v ORDER BY v NULLS LAST) AS dflt, JSON_ARRAYAGG(v ORDER BY v NULLS LAST ABSENT ON NULL) AS abs, JSON_ARRAYAGG(v ORDER BY v NULLS LAST NULL ON NULL) AS nul FROM j1 GROUP BY id ORDER BY id",
+  "source": "pg_target:sqljson16#228",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "arrayagg null modes"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, a INT, t TEXT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,5,'x','{\"k\":1}'),(2,NULL,NULL,NULL)"
+  ],
+  "query": "SELECT id, JSON_OBJECT('a': a, 't': t, 'j': j FORMAT JSON, 'n': NULL ABSENT ON NULL)::text FROM j1 ORDER BY id",
+  "source": "pg_target:sqljson16#229",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "json_object format json + absent"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(a INT)",
+   "INSERT INTO j1 VALUES (1),(NULL),(3)"
+  ],
+  "query": "SELECT JSON_ARRAY(a, a*10, 'txt', NULL, true NULL ON NULL)::text AS nul, JSON_ARRAY(a, a*10, 'txt', NULL, true ABSENT ON NULL)::text AS abs FROM j1 ORDER BY a NULLS LAST",
+  "source": "pg_target:sqljson16#230",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "json_array list null modes"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT JSON_ARRAY(SELECT x FROM (VALUES (3),(1),(2)) v(x) ORDER BY x)::text AS arr",
+  "source": "pg_target:sqljson16#231",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "json_array query form"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(a INT)",
+   "INSERT INTO j1 VALUES (1),(2)"
+  ],
+  "query": "SELECT JSON_ARRAY(SELECT a*3 FROM j1 ORDER BY a RETURNING jsonb)::text AS arr FROM j1 ORDER BY a",
+  "source": "pg_target:sqljson16#232",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "json_array query returning jsonb"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(a INT)",
+   "INSERT INTO j1 VALUES (3),(1),(2),(1)"
+  ],
+  "query": "SELECT JSON_ARRAYAGG(a ORDER BY a RETURNING jsonb)::text AS jb, JSON_ARRAYAGG(a ORDER BY a)::text AS jt FROM j1",
+  "source": "pg_target:sqljson16#233",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "arrayagg returning types"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(k TEXT, v INT)",
+   "INSERT INTO j1 VALUES ('a',1),('b',2),('a',3)"
+  ],
+  "query": "SELECT JSON_OBJECTAGG(k: v WITHOUT UNIQUE KEYS)::text AS jt FROM j1",
+  "source": "pg_target:sqljson16#234",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "objectagg without unique keeps dups"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(g INT, a INT)",
+   "INSERT INTO j1 VALUES (1,5),(1,3),(2,7),(2,1)"
+  ],
+  "query": "SELECT g, JSON_ARRAYAGG(a ORDER BY a) FILTER (WHERE a > 2) AS f FROM j1 GROUP BY g ORDER BY g",
+  "source": "pg_target:sqljson16#235",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "arrayagg filter clause"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, s TEXT)",
+   "INSERT INTO j1 VALUES (1,'{\"k\":1}'),(2,'plain'),(3,'[1,2]')"
+  ],
+  "query": "SELECT id, JSON_OBJECT('v': s FORMAT JSON)::text AS raw, JSON_OBJECT('v': s)::text AS cooked FROM j1 ORDER BY id",
+  "source": "pg_target:sqljson16#236",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "format json raw embed"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(k TEXT, v INT)",
+   "INSERT INTO j1 VALUES ('a',1),('a',2)"
+  ],
+  "query": "SELECT JSON_OBJECTAGG(k: v WITH UNIQUE KEYS) FROM j1",
+  "source": "pg_target:sqljson16#237",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "sqljson16",
+   "objectagg unique keys error"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(g INT, r INT4RANGE)",
+   "INSERT INTO r1 VALUES (1,'[1,5)'),(1,'[3,8)'),(1,'empty'),(2,'[10,20)'),(3,NULL)"
+  ],
+  "query": "SELECT g, range_agg(r)::text FROM r1 GROUP BY g ORDER BY g",
+  "source": "pg_target:multirange#238",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "range_agg"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(g INT, r INT4RANGE)",
+   "INSERT INTO r1 VALUES (1,'[1,5)'),(1,'[8,12)'),(2,'[10,20)'),(2,'[15,25)')"
+  ],
+  "query": "SELECT g, range_intersect_agg(r)::text FROM r1 GROUP BY g ORDER BY g",
+  "source": "pg_target:multirange#239",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "range_intersect_agg pg16"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, m INT4MULTIRANGE)",
+   "INSERT INTO r1 VALUES (1,'{[1,5),[10,20)}'),(2,'{[3,4]}'),(3,'{}'),(4,NULL)"
+  ],
+  "query": "SELECT id, u.r::text AS r, lower(u.r), upper(u.r) FROM r1 LEFT JOIN LATERAL unnest(m) u(r) ON true ORDER BY id, u.r NULLS LAST",
+  "source": "pg_target:multirange#240",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "unnest multirange pg15"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, a INT4MULTIRANGE, b INT4MULTIRANGE)",
+   "INSERT INTO r1 VALUES (1,'{[1,5),[7,9)}','{[2,8)}'),(2,'{[1,3)}','{[5,6)}'),(3,'{}','{[1,9)}')"
+  ],
+  "query": "SELECT id, (a + b)::text AS uni, (a - b)::text AS dif, (a * b)::text AS isect FROM r1 ORDER BY id",
+  "source": "pg_target:multirange#241",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "multirange arith"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, m INT4MULTIRANGE)",
+   "INSERT INTO r1 VALUES (1,'{[1,3),[2,5),[4,6)}'),(2,'{[10,10)}'),(3,'{[5,5]}'),(4,'{[1,1),(1,1]}')"
+  ],
+  "query": "SELECT id, m::text, m = '{[1,6)}'::int4multirange AS eq16, isempty(m) FROM r1 ORDER BY id",
+  "source": "pg_target:multirange#242",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "multirange canonicalization"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, m NUMMULTIRANGE)",
+   "INSERT INTO r1 VALUES (1,'{[1.5,5.5),[10,)}'),(2,'{(,0]}'),(3,'{}')"
+  ],
+  "query": "SELECT id, lower(m), upper(m), lower_inf(m), upper_inf(m), m @> 4.5 AS has45 FROM r1 ORDER BY id",
+  "source": "pg_target:multirange#243",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "nummultirange infinities"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, m TSTZMULTIRANGE)",
+   "INSERT INTO r1 VALUES (1,'{[2024-01-01,2024-01-10),[2024-02-01,2024-02-05)}'),(2,'{}')"
+  ],
+  "query": "SELECT id, m @> timestamptz '2024-01-05' AS jan5, m @> timestamptz '2024-01-15' AS jan15, (m -|- tstzmultirange('{[2024-01-09,2024-01-30)}')) AS adj FROM r1 ORDER BY id",
+  "source": "pg_target:multirange#244",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "tstzmultirange contains adjacent"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, m INT4MULTIRANGE)",
+   "INSERT INTO r1 VALUES (1,'{[1,5),[10,20)}'),(2,'{[3,4]}'),(3,'{}')"
+  ],
+  "query": "SELECT id, range_agg(u.r)::text = m::text AS roundtrip, range_agg(u.r)::text AS agg FROM r1 LEFT JOIN LATERAL unnest(m) u(r) ON true GROUP BY id, m ORDER BY id",
+  "source": "pg_target:multirange#245",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "unnest range_agg roundtrip"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, r INT4RANGE)",
+   "INSERT INTO r1 VALUES (1,'[1,5)'),(2,'[3,8)'),(3,'[10,20)'),(4,'empty')"
+  ],
+  "query": "SELECT id, r::int4multirange::text AS mr, r -|- int4range(5,10) AS adj, r << int4range(10,20) AS before, int4range(0,1) >> r AS after FROM r1 ORDER BY id",
+  "source": "pg_target:multirange#246",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "range cast + position ops"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mt(k INT PRIMARY KEY, v INT)",
+   "INSERT INTO mt VALUES (1,10),(2,20)",
+   "CREATE TABLE ms(k INT, w INT)",
+   "INSERT INTO ms VALUES (1,99),(3,30),(4,NULL)",
+   "MERGE INTO mt USING ms ON mt.k=ms.k WHEN MATCHED THEN UPDATE SET v=ms.w WHEN NOT MATCHED THEN INSERT VALUES (ms.k, ms.w)"
+  ],
+  "query": "SELECT k, v FROM mt ORDER BY k",
+  "source": "pg_target:merge#247",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "merge",
+   "merge basic"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mt(k INT PRIMARY KEY, v INT)",
+   "INSERT INTO mt VALUES (1,10),(2,20),(5,50)",
+   "MERGE INTO mt USING (SELECT k, w*10 AS w FROM (VALUES (1,9),(2,1),(5,9),(7,3)) s(k,w)) q ON mt.k=q.k WHEN MATCHED AND mt.v < q.w THEN UPDATE SET v=q.w WHEN MATCHED THEN DELETE WHEN NOT MATCHED THEN INSERT VALUES (q.k,q.w)"
+  ],
+  "query": "SELECT k, v FROM mt ORDER BY k",
+  "source": "pg_target:merge#248",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "merge",
+   "merge conditional clauses"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mt(k INT PRIMARY KEY, v INT)",
+   "INSERT INTO mt VALUES (1,10),(2,20)",
+   "MERGE INTO mt USING (WITH w AS (SELECT 1 AS k, 77 AS v UNION ALL SELECT 9, 88) SELECT * FROM w) s ON mt.k=s.k WHEN MATCHED THEN UPDATE SET v=s.v WHEN NOT MATCHED THEN INSERT VALUES (s.k, s.v)"
+  ],
+  "query": "SELECT k, v FROM mt ORDER BY k",
+  "source": "pg_target:merge#249",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "merge",
+   "merge cte inside using"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mp(k INT, v INT) PARTITION BY RANGE (k)",
+   "CREATE TABLE mp0 PARTITION OF mp FOR VALUES FROM (0) TO (50)",
+   "CREATE TABLE mp1 PARTITION OF mp FOR VALUES FROM (50) TO (200)",
+   "INSERT INTO mp VALUES (10,1),(60,2)",
+   "MERGE INTO mp USING (VALUES (10,70),(60,5)) s(k,nk) ON mp.k=s.k WHEN MATCHED AND s.nk >= 50 THEN UPDATE SET k=s.nk WHEN MATCHED THEN UPDATE SET v=v*100"
+  ],
+  "query": "SELECT k, v FROM mp ORDER BY k",
+  "source": "pg_target:merge#250",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "merge",
+   "merge partition row movement"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mt(k INT PRIMARY KEY, v INT)",
+   "INSERT INTO mt VALUES (1,1),(4,4)",
+   "CREATE FUNCTION mf() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN NEW.v := NEW.v + 1; RETURN NEW; END $$",
+   "CREATE TRIGGER mtrg BEFORE INSERT OR UPDATE ON mt FOR EACH ROW EXECUTE FUNCTION mf()",
+   "CREATE TABLE ms(k INT, w INT)",
+   "INSERT INTO ms VALUES (1,10),(2,20)",
+   "MERGE INTO mt USING ms ON mt.k=ms.k WHEN MATCHED THEN UPDATE SET v=ms.w WHEN NOT MATCHED THEN INSERT VALUES (ms.k,ms.w)"
+  ],
+  "query": "SELECT k, v FROM mt ORDER BY k",
+  "source": "pg_target:merge#251",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "merge",
+   "merge with before trigger"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mt(k INT PRIMARY KEY, v INT)",
+   "INSERT INTO mt VALUES (1,10),(2,20),(3,30)",
+   "MERGE INTO mt t USING mt s ON t.k = s.k + 1 WHEN MATCHED THEN UPDATE SET v = s.v + 1"
+  ],
+  "query": "SELECT k, v FROM mt ORDER BY k",
+  "source": "pg_target:merge#252",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "merge",
+   "merge self join"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mt(k INT PRIMARY KEY, v INT, g INT GENERATED ALWAYS AS (v*10) STORED)",
+   "INSERT INTO mt(k,v) VALUES (1,10)",
+   "MERGE INTO mt USING (VALUES (1),(5)) s(k) ON mt.k=s.k WHEN MATCHED THEN UPDATE SET v=v+5 WHEN NOT MATCHED THEN INSERT (k,v) VALUES (s.k, DEFAULT)"
+  ],
+  "query": "SELECT k, v, g FROM mt ORDER BY k",
+  "source": "pg_target:merge#253",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "merge",
+   "merge generated col + DEFAULT"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mt(k INT PRIMARY KEY, v INT)",
+   "INSERT INTO mt VALUES (1,10),(2,20)",
+   "CREATE TABLE ms(k INT, w INT)",
+   "INSERT INTO ms VALUES (1,1),(1,2)"
+  ],
+  "query": "MERGE INTO mt USING ms ON mt.k=ms.k WHEN MATCHED THEN UPDATE SET v=ms.w",
+  "source": "pg_target:merge#254",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "merge",
+   "merge second-touch error path"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mt(k INT, v INT)",
+   "INSERT INTO mt VALUES (1,1)",
+   "CREATE RULE mru AS ON INSERT TO mt DO INSTEAD NOTHING"
+  ],
+  "query": "MERGE INTO mt USING (VALUES (2,2)) s(k,v) ON mt.k=s.k WHEN NOT MATCHED THEN INSERT VALUES (s.k,s.v)",
+  "source": "pg_target:merge#255",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "merge",
+   "merge on rule table error"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE mt(k INT PRIMARY KEY, v INT)",
+   "INSERT INTO mt VALUES (1,10),(9,90)",
+   "CREATE TABLE ms(k INT)",
+   "INSERT INTO ms VALUES (1)"
+  ],
+  "query": "MERGE INTO mt USING ms ON mt.k=ms.k WHEN NOT MATCHED BY SOURCE THEN DELETE",
+  "source": "pg_target:merge#256",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "merge",
+   "merge not matched by source pg17"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT, b INT, c INT)",
+   "INSERT INTO s1 SELECT i%50, (i*7)%200, i FROM generate_series(1,4000) i",
+   "CREATE INDEX s1_a ON s1(a)",
+   "ANALYZE s1"
+  ],
+  "query": "SELECT a, b, count(*), sum(c) FROM s1 WHERE a < 20 GROUP BY a, b ORDER BY a, b",
+  "source": "pg_target:incsort#257",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "incsort",
+   "presorted prefix group"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT, b INT)",
+   "INSERT INTO s1 SELECT i%30, i FROM generate_series(1,3000) i",
+   "CREATE INDEX s1_a ON s1(a)",
+   "ANALYZE s1"
+  ],
+  "query": "SELECT a, b FROM s1 WHERE a BETWEEN 5 AND 25 ORDER BY a, b",
+  "source": "pg_target:incsort#258",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "incsort",
+   "partial sort extra key"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT, b INT, c INT)",
+   "INSERT INTO s1 SELECT i%10, i%40, i FROM generate_series(1,3000) i",
+   "CREATE INDEX s1_ab ON s1(a,b)",
+   "ANALYZE s1"
+  ],
+  "query": "SELECT a, b, c FROM s1 WHERE a < 5 ORDER BY a, b, c",
+  "source": "pg_target:incsort#259",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "incsort",
+   "two-key prefix third key"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE out1(k INT)",
+   "INSERT INTO out1 SELECT i%20 FROM generate_series(1,4000) i",
+   "CREATE TABLE in1(k INT, v INT)",
+   "INSERT INTO in1 SELECT i, i*11 FROM generate_series(1,2000) i",
+   "CREATE INDEX in1_k ON in1(k)",
+   "ANALYZE out1",
+   "ANALYZE in1"
+  ],
+  "query": "SELECT o.k, count(*) AS c FROM out1 o JOIN in1 ON in1.k=o.k GROUP BY o.k ORDER BY o.k",
+  "source": "pg_target:memoize#260",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "memoize",
+   "repeated lookup keys"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE out1(k INT)",
+   "INSERT INTO out1 SELECT i%25 FROM generate_series(1,2000) i",
+   "CREATE TABLE in1(k INT, v INT)",
+   "INSERT INTO in1 SELECT i, i*7 FROM generate_series(1,1500) i",
+   "CREATE INDEX in1_k ON in1(k)",
+   "ANALYZE out1",
+   "ANALYZE in1"
+  ],
+  "query": "SELECT o.k, (SELECT count(*) FROM in1 WHERE in1.k=o.k) AS c FROM out1 o GROUP BY o.k ORDER BY o.k",
+  "source": "pg_target:memoize#261",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "memoize",
+   "correlated repeat params"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT, b INT)",
+   "INSERT INTO s1 SELECT i, i*3 % 500 FROM generate_series(1,20000) i"
+  ],
+  "query": "SELECT a, b FROM s1 ORDER BY a DESC, b",
+  "source": "pg_target:workmem#262",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "workmem",
+   "big sort spillable"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT, b INT)",
+   "INSERT INTO s1 SELECT i%4000, i FROM generate_series(1,20000) i"
+  ],
+  "query": "SELECT a, count(*), sum(b) FROM s1 GROUP BY a ORDER BY a",
+  "source": "pg_target:workmem#263",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "workmem",
+   "big groupby spill"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT, b INT)",
+   "INSERT INTO s1 SELECT i%3000, i*5 FROM generate_series(1,18000) i"
+  ],
+  "query": "SELECT DISTINCT a, b%3 FROM s1 ORDER BY a, 2",
+  "source": "pg_target:workmem#264",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "workmem",
+   "big distinct spill"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE DOMAIN darr AS INT[] CHECK (VALUE IS NULL OR cardinality(VALUE) <= 3)",
+   "CREATE TABLE d1(id INT, a darr)",
+   "INSERT INTO d1 VALUES (1,'{1,2,3}'),(2,'{}'),(3,NULL)"
+  ],
+  "query": "SELECT id, a, cardinality(a) FROM d1 ORDER BY id",
+  "source": "pg_target:domain16#265",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "domain16",
+   "domain over array"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TYPE pt AS (x INT, y INT)",
+   "CREATE DOMAIN dpt AS pt CHECK ((VALUE).x <= (VALUE).y)",
+   "CREATE TABLE d1(id INT, p dpt)",
+   "INSERT INTO d1 VALUES (1,ROW(1,2)::pt),(2,ROW(5,5)::pt)"
+  ],
+  "query": "SELECT id, (p).x, (p).y, p = ROW(1,2)::dpt AS eq FROM d1 ORDER BY id",
+  "source": "pg_target:domain16#266",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "domain16",
+   "domain over composite"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE DOMAIN dpos AS INT CHECK (VALUE > 0)",
+   "CREATE DOMAIN dpos2 AS dpos CHECK (VALUE < 100)",
+   "CREATE TABLE d1(a dpos2)",
+   "INSERT INTO d1 VALUES (5),(50),(99)"
+  ],
+  "query": "SELECT a, a::int AS bi, a + 1 AS p1 FROM d1 ORDER BY a",
+  "source": "pg_target:domain16#267",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "domain16",
+   "stacked domains"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE DOMAIN dpos AS INT CHECK (VALUE > 0)",
+   "CREATE TABLE d1(id INT, a dpos[])",
+   "INSERT INTO d1 VALUES (1,'{1,2,3}'),(2,'{}'),(3,NULL)"
+  ],
+  "query": "SELECT id, u.e FROM d1 LEFT JOIN LATERAL unnest(a) u(e) ON true ORDER BY id, u.e NULLS LAST",
+  "source": "pg_target:domain16#268",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "domain16",
+   "array of domain unnest"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE DOMAIN dtxt AS TEXT CHECK (VALUE ~ '^[a-z]+$')",
+   "CREATE TABLE d1(id INT, s dtxt)",
+   "INSERT INTO d1 VALUES (1,'abc'),(2,'xyz')",
+   "CREATE INDEX d1_s ON d1(s)"
+  ],
+  "query": "SELECT id, s FROM d1 WHERE s LIKE 'a%' OR s = 'xyz' ORDER BY id",
+  "source": "pg_target:domain16#269",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "domain16",
+   "domain text + index probe"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE DOMAIN dpos AS INT CHECK (VALUE > 0)",
+   "CREATE TABLE g1(a INT, b dpos GENERATED ALWAYS AS (a*2) STORED)",
+   "INSERT INTO g1(a) VALUES (1),(2),(5)",
+   "CREATE INDEX g1_b ON g1(b)"
+  ],
+  "query": "SELECT a, b FROM g1 WHERE b > 3 ORDER BY a",
+  "source": "pg_target:genexpr#270",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "genexpr",
+   "generated domain col index"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE DOMAIN dpos AS INT CHECK (VALUE > 0)",
+   "CREATE TABLE g1(a INT, b dpos GENERATED ALWAYS AS (a*2) STORED)",
+   "INSERT INTO g1(a) VALUES (1),(0)"
+  ],
+  "query": "SELECT a, b FROM g1 ORDER BY a",
+  "source": "pg_target:genexpr#271",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "genexpr",
+   "generated domain check fires"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT, b INT)",
+   "INSERT INTO g1 VALUES (1,10),(2,20),(3,30)",
+   "CREATE INDEX g1_ab ON g1((a+b))"
+  ],
+  "query": "SELECT a, b FROM g1 WHERE a+b = 30 OR a+b = 12 ORDER BY a",
+  "source": "pg_target:genexpr#272",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "genexpr",
+   "expression index match"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(a INT, b INT GENERATED ALWAYS AS (a % 4) STORED)",
+   "INSERT INTO g1(a) SELECT i FROM generate_series(1,20) i",
+   "CREATE INDEX g1_pb ON g1(b) WHERE b = 0"
+  ],
+  "query": "SELECT a, b FROM g1 WHERE b = 0 ORDER BY a",
+  "source": "pg_target:genexpr#273",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "genexpr",
+   "partial index on generated"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE g1(id INT PRIMARY KEY, a INT, b INT GENERATED ALWAYS AS (a*2) STORED, UNIQUE(a,b))",
+   "INSERT INTO g1(id,a) VALUES (1,5),(2,10)",
+   "INSERT INTO g1(id,a) VALUES (3,5) ON CONFLICT (a,b) DO NOTHING"
+  ],
+  "query": "SELECT id, a, b FROM g1 ORDER BY id",
+  "source": "pg_target:genexpr#274",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "genexpr",
+   "upsert hits generated unique"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE p1(a INT, b INT) PARTITION BY RANGE (a)",
+   "CREATE TABLE p1_0 PARTITION OF p1 FOR VALUES FROM (0) TO (500)",
+   "CREATE TABLE p1_1 PARTITION OF p1 FOR VALUES FROM (500) TO (1000)",
+   "INSERT INTO p1 SELECT i, i*3 FROM generate_series(1,900) i",
+   "CREATE TABLE d1(k INT, w INT)",
+   "INSERT INTO d1 SELECT i, i*2 FROM generate_series(1,50) i",
+   "ANALYZE p1",
+   "ANALYZE d1"
+  ],
+  "query": "SELECT a, b, (SELECT w FROM d1 WHERE d1.k = p1.a % 50) AS w FROM p1 WHERE a % 200 < 20 ORDER BY a",
+  "source": "pg_target:par16#275",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "par16",
+   "corr subq on partitioned"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE big1(a INT, s TEXT)",
+   "INSERT INTO big1 SELECT i, 'v'||(i%100) FROM generate_series(1,20000) i",
+   "ANALYZE big1"
+  ],
+  "query": "SELECT s, count(*), string_agg(a::text, ',' ORDER BY a DESC), array_agg(a ORDER BY a) FROM big1 GROUP BY s ORDER BY s",
+  "source": "pg_target:par16#276",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "par16",
+   "parallel string/array agg pg16"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE l1(a INT)",
+   "INSERT INTO l1 SELECT i FROM generate_series(1,4000) i",
+   "CREATE TABLE r1(a INT)",
+   "INSERT INTO r1 SELECT i FROM generate_series(1000,5000) i",
+   "CREATE INDEX r1_a ON r1(a)",
+   "ANALYZE l1",
+   "ANALYZE r1"
+  ],
+  "query": "SELECT count(*) FROM l1 FULL JOIN r1 ON l1.a=r1.a WHERE l1.a IS NULL OR r1.a IS NULL",
+  "source": "pg_target:par16#277",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "par16",
+   "parallel full join pg16"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE big1(a INT, b INT)",
+   "INSERT INTO big1 SELECT i, i%50 FROM generate_series(1,30000) i",
+   "CREATE TABLE big2(a INT, c INT)",
+   "INSERT INTO big2 SELECT i, i*2 FROM generate_series(1,15000) i",
+   "CREATE INDEX big2_a ON big2(a)",
+   "ANALYZE big1",
+   "ANALYZE big2"
+  ],
+  "query": "SELECT b, count(*) FROM big1 WHERE EXISTS (SELECT 1 FROM big2 WHERE big2.a = big1.a) GROUP BY b ORDER BY b",
+  "source": "pg_target:par16#278",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "par16",
+   "parallel semijoin exists"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE big1(a INT, v NUMERIC)",
+   "INSERT INTO big1 SELECT i, (i*1.5)::numeric FROM generate_series(1,25000) i",
+   "ANALYZE big1"
+  ],
+  "query": "SELECT a%17 AS g, sum(v), avg(v), count(DISTINCT a%997) FROM big1 GROUP BY 1 ORDER BY 1",
+  "source": "pg_target:par16#279",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "par16",
+   "parallel agg + distinct"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":{\"b\":[1,2,3]}}'),(2,'{\"a\":{\"b\":[4]}}'),(3,'{}'),(4,NULL)"
+  ],
+  "query": "SELECT id, j['a'], j['a']['b'][0], j['missing'] FROM j1 ORDER BY id",
+  "source": "pg_target:jsonb_ops#280",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonb subscript pg14"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":{\"b\":1}}'),(2,'{\"a\":2}')",
+   "UPDATE j1 SET j['a']['b'] = '9'::jsonb WHERE id=1",
+   "UPDATE j1 SET j['x']['y'] = '7'::jsonb WHERE id=2"
+  ],
+  "query": "SELECT id, j::text FROM j1 ORDER BY id",
+  "source": "pg_target:jsonb_ops#281",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonb nested subscript update"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":1,\"b\":2}'),(2,'[1,2]'),(3,'\"s\"'),(4,'[3]'),(5,'5')"
+  ],
+  "query": "SELECT id, (j || '5'::jsonb)::text AS js, (j || '[9]'::jsonb)::text AS ja, ('8'::jsonb || j)::text AS pre, (j || '{\"z\":1}'::jsonb)::text AS jo FROM j1 ORDER BY id",
+  "source": "pg_target:jsonb_ops#282",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonb concat type matrix"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":1,\"b\":{\"c\":2}}'),(2,'[1,2,3]'),(3,'{\"a\":{\"b\":{\"c\":9}}}')"
+  ],
+  "query": "SELECT id, (j - 'a')::text AS dma, (j - 'b')::text AS dmb, (j - 1)::text AS di1, (j #- '{a,b,c}')::text AS dpc, (j #- '{b,c}')::text AS dpb FROM j1 ORDER BY id",
+  "source": "pg_target:jsonb_ops#283",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonb delete ops matrix"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'[1,2,3,4]'),(2,'{\"a\":10,\"b\":20}'),(3,'{\"a\":{\"x\":[5,6]}}')"
+  ],
+  "query": "SELECT id, q::text FROM j1, LATERAL jsonb_path_query(j, '$[*] ? (@ > $lim)', jsonb_build_object('lim',2), true) q ORDER BY id, q::text",
+  "source": "pg_target:jsonb_ops#284",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonpath vars passing"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'[\"apple\",\"banana\",\"avocado\"]'),(2,'{\"k1\":\"cat\",\"k2\":\"cut\"}')"
+  ],
+  "query": "SELECT id, q::text FROM j1, LATERAL jsonb_path_query(j, '$[*] ? (@ like_regex \"^a\")', silent => true) q ORDER BY id, q::text",
+  "source": "pg_target:jsonb_ops#285",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonpath like_regex"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":{\"b\":{\"c\":42}}}'),(2,'{\"x\":{\"c\":7}}'),(3,'{\"c\":1}')"
+  ],
+  "query": "SELECT id, q::text FROM j1, LATERAL jsonb_path_query(j, '$.**.c ? (@ > 1)') q ORDER BY id, q::text",
+  "source": "pg_target:jsonb_ops#286",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonpath recursive descent"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'[1,4,9,16]'),(2,'[\"-3\",2.25]'),(3,'[]')"
+  ],
+  "query": "SELECT id, q::text FROM j1, LATERAL jsonb_path_query(j, '$[*].double() ? (@ > 2)') q ORDER BY id, q::text",
+  "source": "pg_target:jsonb_ops#287",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonpath double method"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"d\":\"2024-01-05\"}'),(2,'{\"d\":\"2024-06-01\"}'),(3,'{\"d\":\"notadate\"}')"
+  ],
+  "query": "SELECT id, q::text FROM j1, LATERAL jsonb_path_query(j, '$.d.datetime() ? (@ > \"2024-03-01\".datetime())', silent => true) q ORDER BY id, q::text",
+  "source": "pg_target:jsonb_ops#288",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonpath datetime"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":5}'),(2,'[1,2]'),(3,'\"s\"')"
+  ],
+  "query": "SELECT id, jsonb_path_query(j, 'strict $.a') FROM j1 ORDER BY id",
+  "source": "pg_target:jsonb_ops#289",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonpath strict error"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE j1(id INT, j JSONB)",
+   "INSERT INTO j1 VALUES (1,'{\"a\":[10,20,30]}'),(2,'{\"a\":5}'),(3,'{}')"
+  ],
+  "query": "SELECT id, jsonb_path_query_first(j, '$.a[*] ? (@ >= 20)')::text AS f1, jsonb_path_query_first(j, '$.a')::text AS f2 FROM j1 ORDER BY id",
+  "source": "pg_target:jsonb_ops#290",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "jsonb_ops",
+   "jsonb_path_query_first"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT 0xFF AS h, 0b1010 AS b, 0o17 AS o, 1_000_000 AS u, 0x1F + 0b1 AS mix, 2_5.5 AS f, 1e1_0 AS e",
+  "source": "pg_target:numlit16#291",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "numlit16",
+   "non-decimal + underscore literals"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE n1(a INT)",
+   "INSERT INTO n1 VALUES (0x10),(0b11),(0o20),(1_000)"
+  ],
+  "query": "SELECT a, a = 16 AS eq16, a & 0x0F AS band, a | 0b100 AS bor FROM n1 ORDER BY a",
+  "source": "pg_target:numlit16#292",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "numlit16",
+   "literal insert bitops"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE n1(a NUMERIC, b BIGINT)",
+   "INSERT INTO n1 VALUES (1_000.5, 0x7FFF_FFFF_FFFF_FFFF),(2_5e1, -0b1_000)"
+  ],
+  "query": "SELECT a, b, a + 0.5 AS a2, -b AS nb FROM n1 ORDER BY a",
+  "source": "pg_target:numlit16#293",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "numlit16",
+   "underscore numeric bigint"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE nd(a INT, b TEXT)",
+   "CREATE UNIQUE INDEX ndu ON nd(a) NULLS NOT DISTINCT",
+   "INSERT INTO nd VALUES (NULL,'x'),(1,'p')",
+   "INSERT INTO nd VALUES (NULL,'y'),(2,'q') ON CONFLICT (a) DO UPDATE SET b = 'u'"
+  ],
+  "query": "SELECT a, b FROM nd ORDER BY a NULLS FIRST",
+  "source": "pg_target:pg1516#294",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "nulls not distinct upsert"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE nd(a INT, b TEXT)",
+   "CREATE UNIQUE INDEX ndu ON nd(a)",
+   "INSERT INTO nd VALUES (NULL,'x'),(NULL,'x2'),(1,'p')"
+  ],
+  "query": "SELECT count(*) AS nulls, count(DISTINCT b) AS nb FROM nd",
+  "source": "pg_target:pg1516#295",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "nulls distinct default"
+  ]
+ },
+ {
+  "setup_sqls": [],
+  "query": "SELECT gcd(12,18) AS g1, gcd(0,7) AS g2, lcm(4,6) AS l1, lcm(0,5) AS l2, scale(1.2340::numeric) AS sc, min_scale(1.2300::numeric) AS ms, trim_scale(1.2300::numeric) AS ts",
+  "source": "pg_target:pg1516#296",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "gcd lcm scale pg15"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE i1(d DATE)",
+   "INSERT INTO i1 VALUES ('2024-01-15'),('2024-03-20')"
+  ],
+  "query": "SELECT d, d + interval '1.5 months' AS m15, d + interval '0.25 years' AS y25, interval '2.5 hours' AS h FROM i1 ORDER BY d",
+  "source": "pg_target:pg1516#297",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "interval fractions pg16"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(s TEXT)",
+   "INSERT INTO t1 VALUES ('abc123def'),('x9'),('no-digits')"
+  ],
+  "query": "SELECT s, substring(s FROM '([a-z]+)([0-9]+)' FOR '#') AS sub, substring(s FROM '[0-9]+') AS num FROM t1 ORDER BY s",
+  "source": "pg_target:pg1516#298",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "substring for escape pg14"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, s TEXT)",
+   "INSERT INTO t1 VALUES (1,'123x'),(2,'42'),(3,'1e5'),(4,'abc')"
+  ],
+  "query": "SELECT id, (pg_input_error_info(s,'int4')).* FROM t1 ORDER BY id",
+  "source": "pg_target:pg1516#299",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "pg_input_error_info pg16"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(g INT, s TEXT)",
+   "INSERT INTO t1 VALUES (1,'b'),(1,'a'),(1,'a'),(2,'c'),(2,'a')"
+  ],
+  "query": "SELECT g, string_agg(DISTINCT s, ',' ORDER BY s), count(DISTINCT s) FROM t1 GROUP BY g ORDER BY g",
+  "source": "pg_target:pg1516#300",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "distinct agg order by pg16"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(g INT, v INT)",
+   "INSERT INTO t1 VALUES (1,5),(1,5),(2,9),(3,NULL),(3,NULL)"
+  ],
+  "query": "SELECT g, any_value(v) FROM t1 GROUP BY g ORDER BY g",
+  "source": "pg_target:pg1516#301",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "any_value pg16"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, s TEXT)",
+   "INSERT INTO t1 VALUES (1,'abc'),(2,'a' || U&'0308'),(3,'x%y')"
+  ],
+  "query": "SELECT id, s IS NORMALIZED, s IS NFC NORMALIZED, s IS NFKC NORMALIZED FROM t1 ORDER BY id",
+  "source": "pg_target:pg1516#302",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "is normalized predicate"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(t TIMESTAMPTZ)",
+   "INSERT INTO t1 VALUES ('2024-03-10 15:04:05+05:30'),('2024-12-25 00:00:00-08:00')"
+  ],
+  "query": "SELECT to_char(t, 'YYYY-MM-DD HH24:MI OF TZH:TZM'), to_char(t, 'Dy Mon DD YYYY') FROM t1 ORDER BY t",
+  "source": "pg_target:pg1516#303",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "to_char OF TZH TZM pg16"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(id INT, s TEXT CHECK (s IS JSON OBJECT))",
+   "INSERT INTO t1 VALUES (1,'{\"a\":1}'),(2,'{}')"
+  ],
+  "query": "SELECT id, s FROM t1 ORDER BY id",
+  "source": "pg_target:pg1516#304",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "is json in check constraint"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE DOMAIN dn AS INT",
+   "CREATE TABLE d1(a dn)",
+   "INSERT INTO d1 VALUES (-5),(3)",
+   "ALTER DOMAIN dn ADD CONSTRAINT dnc CHECK (VALUE > 0)"
+  ],
+  "query": "SELECT a FROM d1 ORDER BY a",
+  "source": "pg_target:pg1516#305",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "pg1516",
+   "alter domain retro check error"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, m INT4MULTIRANGE)",
+   "INSERT INTO r1 VALUES (1,'{[1,3),[7,9)}'),(2,'{}'),(3,NULL)"
+  ],
+  "query": "SELECT id, u.r::text, u.n FROM r1 LEFT JOIN LATERAL unnest(m) WITH ORDINALITY u(r,n) ON true ORDER BY id, u.n NULLS LAST",
+  "source": "pg_target:multirange#306",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "unnest multirange ordinality"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE r1(id INT, x INT4RANGE)",
+   "INSERT INTO r1 VALUES (1,'[1,3)'),(1,'empty'),(2,'[5,9)'),(2,'[7,10)')"
+  ],
+  "query": "SELECT id, range_intersect_agg(x) OVER (PARTITION BY id)::text AS ri, range_agg(x) OVER (PARTITION BY id)::text AS ra FROM r1 ORDER BY id, x::text",
+  "source": "pg_target:multirange#307",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "multirange",
+   "range aggs as window fns"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE t1(s TEXT)",
+   "INSERT INTO t1 VALUES ('a-b-c'),('xy'),('')"
+  ],
+  "query": "SELECT s, st.v, st.n FROM t1, LATERAL string_to_table(s, '-') WITH ORDINALITY st(v,n) ORDER BY s, st.n",
+  "source": "pg_target:misc#308",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "misc",
+   "string_to_table pg14"
+  ]
+ },
+ {
+  "setup_sqls": [
+   "CREATE TABLE s1(a INT, b INT, c INT)",
+   "INSERT INTO s1 SELECT i%40, i, i%97 FROM generate_series(1,3000) i",
+   "CREATE INDEX s1_a ON s1(a)",
+   "ANALYZE s1"
+  ],
+  "query": "SELECT a, c, row_number() OVER (ORDER BY a, c) rn FROM s1 WHERE a<3 ORDER BY a, c",
+  "source": "pg_target:incsort#309",
+  "engine": "postgres",
+  "tags": [
+   "pg_native",
+   "pg16_r2",
+   "incsort",
+   "window fed by presorted prefix"
+  ]
+ }
+]
