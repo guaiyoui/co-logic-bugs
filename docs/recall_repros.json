@@ -1,0 +1,102 @@
+{
+ "F3": {
+  "setup": [
+   "CREATE TABLE ev(id INT, ts INT)",
+   "CREATE TABLE px(id INT, ts INT, p INT)",
+   "INSERT INTO ev VALUES (1,5),(1,9),(2,5)",
+   "INSERT INTO px VALUES (1,5,10),(1,5,20),(1,8,30),(2,4,40)"
+  ],
+  "q": "SELECT px.p FROM ev ASOF JOIN px ON ev.id = px.id AND ev.ts >= px.ts ORDER BY ev.id, ev.ts, px.p",
+  "fix_set": [
+   "join_order"
+  ],
+  "key": "44b71a9cdb967e4fa475"
+ },
+ "F7": {
+  "setup": [
+   "CREATE TABLE t(d DATE)",
+   "INSERT INTO t VALUES (DATE '2024-01-31'),(DATE '2024-02-29'),(DATE '2023-02-28')"
+  ],
+  "q": "SELECT d + INTERVAL '1 month' d1, d + INTERVAL '30 days' d2 FROM t ORDER BY d",
+  "fix_set": [
+   "common_subexpressions",
+   "expression_rewriter"
+  ],
+  "key": "b7178506544a311f5745"
+ },
+ "F1": {
+  "setup": [
+   "CREATE TABLE issue23979_l(o INTEGER PRIMARY KEY)",
+   "INSERT INTO issue23979_l VALUES (1), (2)",
+   "CREATE TABLE issue23979_r(o INTEGER PRIMARY KEY, wh INTEGER NOT NULL)",
+   "INSERT INTO issue23979_r VALUES (1, 1)",
+   "CREATE TABLE issue23979_s2(o INTEGER, wh INTEGER)",
+   "INSERT INTO issue23979_s2 VALUES (1, 2), (2, 3)"
+  ],
+  "q": "SELECT EXISTS ( SELECT 1 FROM issue23979_s2 x WHERE x.o = l.o AND r.wh <> x.wh ) AS correlated_exists, EXISTS ( SELECT 1 FROM issue23979_s2 x WHERE x.o = l.o AND (r.wh + 0) <> x.wh ) AS equivalent_rewrite FROM issue23979_l l LEFT JOIN issue23979_r r USING (o) JOIN issue23979_s2 s2 USING (o) ORDER BY l.o",
+  "fix_set": [
+   "deliminator",
+   "filter_pushdown"
+  ],
+  "key": "f4bdb2047ff576bf4ff7"
+ },
+ "F2": {
+  "setup": [
+   "CREATE TABLE src(a INTEGER, b INTEGER, v INTEGER)",
+   "INSERT INTO src VALUES (1, 1, 10), (1, 2, 20)"
+  ],
+  "q": "SELECT SUM(v) OVER (PARTITION BY a, a, b) AS w_aab, SUM(v) OVER (PARTITION BY a, a, a) AS w_aaa FROM src ORDER BY b",
+  "fix_set": [
+   "window_self_join"
+  ],
+  "key": "a7e5c9f74a2d3f9fb8b6"
+ },
+ "F8": {
+  "setup": [
+   "CREATE TABLE t8a (id INTEGER, s VARCHAR);",
+   "CREATE TABLE t8b (id INTEGER, s VARCHAR);",
+   "INSERT INTO t8a VALUES (1, 'one'), (2, 'TWO'), (3, 'three');",
+   "INSERT INTO t8b VALUES (1, 'ONE'), (2, 'two'), (3, 'THREE');"
+  ],
+  "q": "SELECT s COLLATE NOCASE AS s_nc FROM t8a UNION SELECT s COLLATE NOCASE AS s_nc FROM t8b ORDER BY s_nc",
+  "fix_set": [
+   "threads"
+  ],
+  "key": "a88e4241a9e48dbafb0f"
+ },
+ "F9": {
+  "setup": [
+   "CREATE TABLE t (x INTEGER, y INTEGER);",
+   "INSERT INTO t VALUES (1,1),(1,2),(2,1),(2,2),(NULL,1),(1,NULL),(NULL,NULL),(3,3);"
+  ],
+  "q": "SELECT DISTINCT CASE WHEN x IS NULL THEN 'n' WHEN x > y THEN 'gt' WHEN x = y THEN 'eq' ELSE 'lt' END AS bucket, COUNT(*) OVER () AS total FROM t ORDER BY bucket;",
+  "fix_set": [],
+  "key": "c74e412183111319521c"
+ },
+ "F5": {
+  "setup": [
+   "CREATE TABLE left_table (id INTEGER, val INTEGER, amount INTEGER)",
+   "INSERT INTO left_table VALUES (1, 1, 50), (2, 1, 75), (3, 2, 60), (4, 2, 90), (5, 3, 100)",
+   "CREATE TABLE right_table (id INTEGER, category INTEGER, budget INTEGER)",
+   "INSERT INTO right_table VALUES (1, 1, 1000), (2, 2, 2000), (3, 1, 1500)",
+   "CREATE TABLE ordered_probe(flag BOOLEAN, ord INTEGER)",
+   "INSERT INTO ordered_probe VALUES (true, 1), (true, 2), (false, 3)",
+   "CREATE TABLE boolean_keys(flag_key BOOLEAN)",
+   "INSERT INTO boolean_keys VALUES (false)"
+  ],
+  "q": "WITH c AS ( SELECT flag FROM ordered_probe ORDER BY ord OFFSET 2 ) SELECT * FROM c INNER JOIN boolean_keys ON flag = flag_key",
+  "fix_set": [
+   "threads"
+  ],
+  "key": "6ce51ef7f571928926e0"
+ },
+ "F6": {
+  "setup": [
+   "CREATE TABLE accounts (acct_id INTEGER NOT NULL, owner VARCHAR, balance NUMERIC(18,4), created DATE, active BOOLEAN, last_seen TIMESTAMP)",
+   "CREATE TABLE orders (order_id BIGINT NOT NULL, acct_id INTEGER, amount DOUBLE PRECISION, status VARCHAR, placed DATE)"
+  ],
+  "q": "SELECT o1.amount FROM orders o1 WHERE NOT EXISTS (SELECT 1 FROM orders o2 WHERE o2.acct_id = o1.acct_id AND o2.order_id <> o1.order_id AND o2.amount > o1.amount)",
+  "fix_set": [],
+  "key": "ab630f7b10b41b0cc594"
+ }
+}
