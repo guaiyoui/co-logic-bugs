@@ -7,7 +7,7 @@ Each directory contains self-contained reproducers: a commented `.sql`
 file per bug family (version, expected vs actual, upstream references),
 plus standalone verifier scripts where applicable.
 
-## Confirmed families (21)
+## Confirmed families (31)
 
 | engine | version | family | manifestation | status |
 |---|---|---|---|---|
@@ -32,6 +32,16 @@ plus standalone verifier scripts where applicable.
 | SQLite | 3.51.2 | [SQLITE-C](sqlite/SQLITE-C_unistr.sql) | `unistr()` emits malformed UTF-8 (no surrogate pairing) | deterministic 10/10 |
 | TiDB | v8.5.8 | [TIDB-A](tidb/TIDB-A_time_overflow.sql) | TIME overflow unchecked in TiDB layer (vs MySQL 9.7.1) | upstream pingcap/tidb#56865 still open |
 | TiDB | v8.5.8 | [TIDB-B](tidb/TIDB-B_decimal_division.sql) | decimal division extra internal precision (compat gap) | low severity |
+| PostgreSQL | 17.11/18.6/master | [PG-A](postgres/PG-A_excl_spgist_ndcoll.sql) | `EXCLUDE USING spgist` + nondeterministic collation -> constraint silently unenforced | novel (BUG #19641 covers query path only) |
+| PostgreSQL | 17.11/18.6/master | [PG-B](postgres/PG-B_interval_out_reparse.sql) | `interval_out` emits literal `interval_in` rejects -> pg_dump file unrestorable | novel |
+| PostgreSQL | 17.11/18.6/master | [PG-C](postgres/PG-C_time_interval_overflow.sql) | `time_mi`/`timetz_pl`/`timetz_mi` int64 wrap -> silent wrong time | extends BUG #19670 (1 of 4 sites reported) |
+| PostgreSQL | 17.11/18.6 | [PG-D](postgres/PG-D_ssi_arbiter_probe.sql) | `ON CONFLICT` arbiter probe takes no SIREAD -> all-commit G2-item | known (Yandex thread); fixed master, not backported |
+| PostgreSQL | 17.11/18.6/master | [PG-E](postgres/PG-E_ssi_doom_swallow.sql) | 40001 raised before SXACT_FLAG_DOOMED -> SAVEPOINT/plpgsql swallows it, txn commits | known (CF 6904); indep. repro + plpgsql path + A/B |
+| PostgreSQL | 16.2..master | [PG-F](postgres/PG-F_memoize_param.sql) | Memoize key omits join param -> stale cache, wrong count | known (CF 7175/ee2bbec); A/B verified |
+| PostgreSQL | 18.6/master | [PG-G](postgres/PG-G_bit_input_diag.sql) | `pg_input_error_info` vs real coercion disagree on SQLSTATE for `bit` | novel, low severity (diagnostics only) |
+| MariaDB | 11.8.9 | [MDB-A](mariadb/MDB-A_quantified_doubleneg.sql) | `NOT(NOT(x <op> ANY/ALL))` returns complement; `<>` newly affected | upstream #121079/MDEV-40443 open |
+| MariaDB | 11.8.9 | [MDB-B](mariadb/MDB-B_mergeview_window_quantified.sql) | merged source x window/agg x quantified -> empty set; derived/CTE hit | extends MDEV-40557/40780 (12 new shapes) |
+| MySQL | 8.4.2 | [MYSQL-A](mysql/MYSQL-A_quantified_doubleneg.sql) | `NOT(NOT(quantified))` wrong result on 8.4 LTS | upstream #121079 (fixed only in 9.7) |
 
 ## Framework (`framework/`)
 
@@ -70,6 +80,11 @@ expected vs actual output, and upstream references.
   A standalone verifier is included: `python sqlite/sqlite_unistr_hunt.py`.
 - **TiDB**: `tiup playground` on 127.0.0.1:4000 plus a MySQL reference
   (divergence vs MySQL 9.7.1 is the oracle).
+- **PostgreSQL**: `psql -f postgres/<file>.sql` against 17.x/18.x
+  (PG-A needs an ICU build; PG-D/PG-E are two-session choreography —
+  run the commented steps on two SERIALIZABLE connections in order).
+- **MariaDB / MySQL**: feed each file to the `mariadb`/`mysql` client;
+  the oracle is `NOT(NOT P) ≡ P` evaluated by the engine itself.
 
 ## Documentation
 

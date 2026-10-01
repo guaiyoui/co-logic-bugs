@@ -1,0 +1,59 @@
+-- PG-E: SERIALIZABLE — serialization failure swallowed by SAVEPOINT /
+--        plpgsql EXCEPTION -> doomed transaction commits a
+--        non-serializable schedule
+--
+-- Engine : PostgreSQL 17.11 / 18.6 / master (20devel) WITHOUT the
+--          CF 6904 patch — all reproduce.  Patched master aborts the
+--          doomed txn at COMMIT with 40001 (verified A/B).
+--          Two sessions; deterministic choreography.
+--
+-- Root cause: predicate.c raises two ereports BEFORE setting
+--   writer->flags |= SXACT_FLAG_DOOMED
+--   (OnConflict_CheckForSerializationFailure /
+--    CheckForSerializableConflictOut).  With doom unset,
+--   PreCommit_CheckForSerializationFailure's SxactIsDoomed check never
+--   fires and the committed in-conflict scan only checks "is my
+--   in-edge partner a pivot" — not "am I a pivot" -> commit proceeds.
+--
+-- Upstream: CF 6904 "Possible G2 anomaly at SERIALIZABLE" (reporter
+--   Kyle Kingsbury; Andrey Borodin / Zsolt Parragi), status
+--   Needs review.  Patch adds DoomMyselfAndRaiseSerializationFailure()
+--   at all 10 user-visible 40001 sites + serializable-savepoint.spec.
+--   This file documents an INDEPENDENT deterministic reproduction and
+--   a third trigger path (plpgsql EXCEPTION — the standard application
+--   retry idiom, no explicit SAVEPOINT needed).
+--
+-- Choreography — rw(k int PK, v int), rows k=1,2 with v=0:
+
+-- ===== read variant (true G2 cycle, both commit) =====
+-- s1: BEGIN SERIALIZABLE; SELECT v FROM rw WHERE k=2;   -> 0
+-- s2: BEGIN SERIALIZABLE; UPDATE rw SET v=v+1 WHERE k=2;
+-- s1: UPDATE rw SET v=v+1 WHERE k=1;  COMMIT;           -- ok
+-- s2: SAVEPOINT sp;
+--     SELECT v FROM rw WHERE k=1;   -> 40001 (conflict out to old pivot)
+--     ROLLBACK TO SAVEPOINT sp;     -- error swallowed
+--     COMMIT;                       -- !! COMMITS (17.11/18.6/master
+--                                   --    unpatched).  Serializability
+--                                   --    violated: s1<s2 (read row2
+--                                   --    preimage), s2<s1 (read row1
+--                                   --    preimage survives subtxn
+--                                   --    rollback per README-SSI).
+--
+-- ===== plpgsql variant (realistic retry idiom) =====
+-- CREATE FUNCTION read1() RETURNS int LANGUAGE plpgsql AS $$
+-- BEGIN
+--   RETURN (SELECT v FROM rw WHERE k=1);
+-- EXCEPTION WHEN serialization_failure THEN RETURN -99;
+-- END $$;
+-- s2: UPDATE row2; SELECT read1();  (40001 swallowed -> -99)
+--     UPDATE row2; COMMIT;          -- !! COMMITS unpatched,
+--                                   --    40001 patched.
+
+-- Verified matrix (s2 COMMIT outcome):
+--   PG 17.11 / 18.6 / unpatched master : COMMIT succeeds (bug)
+--   master + cfbot v2 patch (7a88360)  : COMMIT -> 40001 (correct),
+--                                        row2 rolled back.
+
+-- Impact: SERIALIZABLE does not actually guarantee serializability on
+--   released branches; any app that retries on serialization_failure
+--   via plpgsql exception blocks can commit non-serializable results.

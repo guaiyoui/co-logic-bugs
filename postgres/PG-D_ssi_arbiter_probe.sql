@@ -1,0 +1,54 @@
+-- PG-D: SERIALIZABLE — ON CONFLICT arbiter probe takes no SIREAD lock
+--        -> deterministic all-commit G2-item anomaly (non-serializable
+--        schedule commits on released branches)
+--
+-- Engine : PostgreSQL 17.11 / 18.6 BOTH COMMIT (bug);
+--          master (20devel) aborts one txn with 40001 (fixed).
+--          Two sessions; events must be choreographed as ordered below.
+--
+-- Root cause: check_exclusion_or_unique_constraint() in
+--   execIndexing.c finds the conflicting tuple under SnapshotDirty — a
+--   non-MVCC snapshot that takes NO predicate locks.  The conflict
+--   decision (DO NOTHING vs DO UPDATE) is a read for dependency
+--   purposes but leaves no SIREAD -> invisible to SSI cycle detection.
+--   Master re-reads conflictTid under es_snapshot to record the lock;
+--   the fix is NOT backported to 17.x/18.x as of 17.11/18.6.
+--
+-- Upstream: matches the Yandex pgsql-hackers thread "Possible G2-item
+--   at SERIALIZABLE" and cfbot 1824597 patch family.
+--
+-- Choreography (two SERIALIZABLE sessions, kv(id bigint PK, val text),
+-- seeded with rows 0..31, val 'i'+id):
+
+-- t1: BEGIN; SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+-- t1: SELECT val FROM kv WHERE id=4;                 -> 'i4'
+-- t0: BEGIN; SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+-- t0: INSERT INTO kv VALUES (0,'t0') ON CONFLICT DO NOTHING;
+--       -> rowcount 0   (arbiter probe found kv0 under SnapshotDirty,
+--                        took NO SIREAD)
+-- t0: INSERT INTO kv VALUES (4,'x')
+--       ON CONFLICT(id) DO UPDATE SET val = kv.val||',t0';
+--       -> 1
+-- t1: DELETE FROM kv WHERE id=0;                     -> 1
+-- both: COMMIT;
+--
+--   PG 17.11 / 18.6 : BOTH COMMIT  <- no serial order exists (BUG)
+--   master          : t1 -> 40001 serialization_failure (correct)
+--
+-- Why no serial order exists:
+--   t1 saw kv4='i4' before t0's append        => t1 < t0
+--   t0's arbiter probe saw kv0 conflicting     => t0 < t1's DELETE
+--   t1's DELETE of kv0 committed.
+--   Cycle t0 -> t1 -> t0 (two rw-antidependencies).  SSI must abort
+--   one side; released branches commit both.
+--
+-- Control: replace the probe with a plain
+--   SELECT val FROM kv WHERE id=0
+-- (returns the row, takes SIREAD) -> t0 aborts 40001 on ALL versions.
+-- The read is conflict-visible only when it goes through the normal
+-- MVCC path; the arbiter path is invisible to SSI.
+--
+-- Discovery: pg_ssi_fuzz.py 3-session SERIALIZABLE fuzzer with a
+-- brute-force N! serial-order oracle over committed transactions
+-- (reads + write rowcounts as existence-reads); iter=420 flagged a
+-- reads-class anomaly, distilled to this 2-txn reproducer.
